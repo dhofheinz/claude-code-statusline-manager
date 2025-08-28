@@ -1,0 +1,30 @@
+# Code Owners for Claude Code Statusline Manager
+# These users will be automatically requested for review when someone opens a pull request
+
+# Global owners - will be requested for review on all changes
+* @dhofheinz
+
+# Documentation owners
+/docs/ @dhofheinz @documentation-team
+*.md @dhofheinz @documentation-team
+/GETTING_STARTED.md @dhofheinz
+/README.md @dhofheinz
+
+# Core scripts owners
+/statusline-*.sh @dhofheinz @core-team
+/install.sh @dhofheinz @devops-team
+/statusline-manager.sh @dhofheinz @core-team
+
+# GitHub Actions workflows
+/.github/workflows/ @dhofheinz @devops-team
+/.github/ISSUE_TEMPLATE/ @dhofheinz @community-team
+/.github/PULL_REQUEST_TEMPLATE/ @dhofheinz @community-team
+
+# Security-related files
+/SECURITY.md @dhofheinz @security-team
+/.github/workflows/security.yml @dhofheinz @security-team
+
+# Configuration files
+/.gitignore @dhofheinz
+/settings.json.example @dhofheinz @core-team
+/.github/branch-protection.json @dhofheinz @devops-team

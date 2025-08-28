@@ -1,0 +1,419 @@
+name: Release Management
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.2.3)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  packages: write
+  issues: write
+  pull-requests: write
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  # ============================================================================
+  # PREPARE RELEASE
+  # ============================================================================
+  
+  prepare:
+    name: Prepare Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      version_without_v: ${{ steps.version.outputs.version_without_v }}
+      previous_tag: ${{ steps.version.outputs.previous_tag }}
+      release_notes: ${{ steps.notes.outputs.release_notes }}
+      
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: Determine version
+      id: version
+      run: |
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          VERSION="${GITHUB_REF#refs/tags/}"
+        fi
+        
+        # Validate semantic version
+        if ! [[ "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+)?$ ]]; then
+          echo "Error: Invalid version format: $VERSION"
+          echo "Expected format: v1.2.3 or v1.2.3-beta"
+          exit 1
+        fi
+        
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "version_without_v=${VERSION#v}" >> $GITHUB_OUTPUT
+        
+        # Get previous tag for changelog
+        PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+        echo "previous_tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
+        
+        echo "Releasing version: $VERSION"
+        echo "Previous version: $PREVIOUS_TAG"
+    
+    - name: Generate release notes
+      id: notes
+      run: |
+        VERSION="${{ steps.version.outputs.version }}"
+        PREVIOUS="${{ steps.version.outputs.previous_tag }}"
+        
+        # Generate changelog
+        cat > release-notes.md << EOF
+        # Release $VERSION
+        
+        **Release Date:** $(date -u +"%Y-%m-%d")
+        
+        ## 🎉 Highlights
+        
+        EOF
+        
+        # Add commit summary if previous tag exists
+        if [[ -n "$PREVIOUS" ]]; then
+          echo "## 📝 Changes since $PREVIOUS" >> release-notes.md
+          echo "" >> release-notes.md
+          
+          # Group commits by type
+          echo "### ✨ Features" >> release-notes.md
+          git log $PREVIOUS..HEAD --pretty=format:"- %s (%h)" --grep="^feat" >> release-notes.md || true
+          echo -e "\n" >> release-notes.md
+          
+          echo "### 🐛 Bug Fixes" >> release-notes.md
+          git log $PREVIOUS..HEAD --pretty=format:"- %s (%h)" --grep="^fix" >> release-notes.md || true
+          echo -e "\n" >> release-notes.md
+          
+          echo "### 📚 Documentation" >> release-notes.md
+          git log $PREVIOUS..HEAD --pretty=format:"- %s (%h)" --grep="^docs" >> release-notes.md || true
+          echo -e "\n" >> release-notes.md
+          
+          echo "### 🔧 Maintenance" >> release-notes.md
+          git log $PREVIOUS..HEAD --pretty=format:"- %s (%h)" --grep="^chore\|^refactor\|^test" >> release-notes.md || true
+          echo -e "\n" >> release-notes.md
+          
+          # Add contributor list
+          echo "## 👥 Contributors" >> release-notes.md
+          git log $PREVIOUS..HEAD --format="%aN" | sort -u | while read -r name; do
+            echo "- $name" >> release-notes.md
+          done
+          echo "" >> release-notes.md
+        fi
+        
+        # Add installation instructions
+        cat >> release-notes.md << 'EOF'
+        
+        ## 📥 Installation
+        
+        ### Quick Install
+        ```bash
+        curl -sSL https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.version }}/install.sh | bash
+        ```
+        
+        ### Manual Download
+        - [📦 claude-statusline-manager-${{ steps.version.outputs.version_without_v }}.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.version }}/claude-statusline-manager-${{ steps.version.outputs.version_without_v }}.tar.gz)
+        - [📦 claude-statusline-manager-${{ steps.version.outputs.version_without_v }}.zip](https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.version }}/claude-statusline-manager-${{ steps.version.outputs.version_without_v }}.zip)
+        - [🚀 Self-extracting installer](https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.version }}/claude-statusline-installer-${{ steps.version.outputs.version_without_v }}.sh)
+        
+        ## 📋 Checksums
+        
+        See `checksums.sha256` and `checksums.md5` in release assets.
+        
+        ## 📖 Full Documentation
+        
+        - [Getting Started Guide](https://github.com/${{ github.repository }}/blob/main/GETTING_STARTED.md)
+        - [Changelog](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md)
+        
+        EOF
+        
+        # Output release notes
+        {
+          echo 'release_notes<<EOF'
+          cat release-notes.md
+          echo 'EOF'
+        } >> $GITHUB_OUTPUT
+
+  # ============================================================================
+  # BUILD RELEASE ASSETS
+  # ============================================================================
+  
+  build:
+    name: Build Release Assets
+    needs: prepare
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Setup build environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y zip tar gzip bzip2 jq
+    
+    - name: Update version files
+      run: |
+        VERSION="${{ needs.prepare.outputs.version_without_v }}"
+        
+        # Update VERSION file
+        echo "$VERSION" > VERSION
+        
+        # Update version in scripts
+        for script in *.sh; do
+          if [[ -f "$script" ]]; then
+            sed -i "1a# Version: $VERSION" "$script"
+          fi
+        done
+        
+        # Create version.json
+        cat > version.json << EOF
+        {
+          "version": "$VERSION",
+          "release_date": "$(date -u +"%Y-%m-%d")",
+          "git_sha": "${{ github.sha }}",
+          "git_ref": "${{ github.ref }}"
+        }
+        EOF
+    
+    - name: Create distribution archives
+      run: |
+        VERSION="${{ needs.prepare.outputs.version_without_v }}"
+        mkdir -p dist
+        
+        # Create tar.gz archive
+        tar -czf "dist/claude-statusline-manager-${VERSION}.tar.gz" \
+          --exclude='.git*' \
+          --exclude='dist' \
+          --exclude='tests' \
+          --exclude='*.log' \
+          --exclude='.github' \
+          --transform="s,^,claude-statusline-manager-${VERSION}/," \
+          *.sh *.md LICENSE settings.json.example VERSION version.json
+        
+        # Create zip archive
+        mkdir -p "tmp/claude-statusline-manager-${VERSION}"
+        cp *.sh *.md LICENSE settings.json.example VERSION version.json "tmp/claude-statusline-manager-${VERSION}/"
+        cd tmp
+        zip -r "../dist/claude-statusline-manager-${VERSION}.zip" "claude-statusline-manager-${VERSION}"
+        cd ..
+        rm -rf tmp
+        
+        # Create self-extracting installer
+        cat > dist/installer-header.sh << 'HEADER'
+        #!/bin/bash
+        # Claude Code Statusline Manager - Self-extracting installer
+        set -e
+        
+        echo "Claude Code Statusline Manager Installer"
+        echo "========================================"
+        echo ""
+        
+        # Extract archive
+        TEMP_DIR=$(mktemp -d)
+        trap "rm -rf $TEMP_DIR" EXIT
+        
+        echo "Extracting files..."
+        ARCHIVE_START=$(awk '/^__ARCHIVE_START__/ { print NR + 1; exit 0; }' "$0")
+        tail -n +"$ARCHIVE_START" "$0" | tar -xz -C "$TEMP_DIR"
+        
+        # Run installer
+        cd "$TEMP_DIR/claude-statusline-manager-*"
+        ./install.sh "$@"
+        exit $?
+        
+        __ARCHIVE_START__
+        HEADER
+        
+        cat dist/installer-header.sh "dist/claude-statusline-manager-${VERSION}.tar.gz" > \
+          "dist/claude-statusline-installer-${VERSION}.sh"
+        chmod +x "dist/claude-statusline-installer-${VERSION}.sh"
+        rm dist/installer-header.sh
+        
+        # Generate checksums
+        cd dist
+        sha256sum *.tar.gz *.zip *.sh > checksums.sha256
+        md5sum *.tar.gz *.zip *.sh > checksums.md5
+        
+        # Create signature files (if GPG key available)
+        if [[ -n "${{ secrets.GPG_PRIVATE_KEY }}" ]]; then
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --import
+          for file in *.tar.gz *.zip *.sh; do
+            gpg --armor --detach-sign "$file"
+          done
+        fi
+        
+        # List all assets
+        echo "Release assets created:"
+        ls -la
+    
+    - name: Upload release artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-assets
+        path: dist/
+        retention-days: 7
+
+  # ============================================================================
+  # CREATE GITHUB RELEASE
+  # ============================================================================
+  
+  release:
+    name: Create GitHub Release
+    needs: [prepare, build]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Download release assets
+      uses: actions/download-artifact@v4
+      with:
+        name: release-assets
+        path: dist/
+    
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ needs.prepare.outputs.version }}
+        name: ${{ needs.prepare.outputs.version }}
+        body: ${{ needs.prepare.outputs.release_notes }}
+        draft: false
+        prerelease: ${{ github.event.inputs.prerelease || contains(needs.prepare.outputs.version, '-') }}
+        files: |
+          dist/*.tar.gz
+          dist/*.zip
+          dist/*.sh
+          dist/checksums.*
+          dist/*.asc
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================================================
+  # POST-RELEASE TASKS
+  # ============================================================================
+  
+  post-release:
+    name: Post-Release Tasks
+    needs: [prepare, release]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        ref: main
+    
+    - name: Update documentation
+      run: |
+        VERSION="${{ needs.prepare.outputs.version }}"
+        VERSION_WITHOUT_V="${{ needs.prepare.outputs.version_without_v }}"
+        
+        # Update README with latest version
+        sed -i "s/version-[0-9.]*-/version-${VERSION_WITHOUT_V}-/g" README.md
+        
+        # Update installation instructions
+        sed -i "s|releases/download/v[0-9.]*/|releases/download/${VERSION}/|g" README.md
+        sed -i "s|releases/download/v[0-9.]*/|releases/download/${VERSION}/|g" GETTING_STARTED.md
+        
+        # Update CHANGELOG
+        if ! grep -q "## \[$VERSION\]" CHANGELOG.md; then
+          sed -i "/## \[Unreleased\]/a\\
+        \\
+        ## [$VERSION] - $(date +%Y-%m-%d)" CHANGELOG.md
+        fi
+    
+    - name: Create pull request for documentation updates
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "docs: update for release ${{ needs.prepare.outputs.version }}"
+        title: "docs: update documentation for ${{ needs.prepare.outputs.version }}"
+        body: |
+          ## Automated documentation update
+          
+          This PR updates the documentation for release ${{ needs.prepare.outputs.version }}:
+          
+          - [ ] Version badges updated
+          - [ ] Installation instructions updated
+          - [ ] CHANGELOG entry added
+          
+          **Auto-merge enabled after checks pass.**
+        branch: docs/release-${{ needs.prepare.outputs.version_without_v }}
+        delete-branch: true
+        labels: |
+          documentation
+          automated
+          release
+
+  # ============================================================================
+  # ANNOUNCE RELEASE
+  # ============================================================================
+  
+  announce:
+    name: Announce Release
+    needs: [prepare, release]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Create release announcement issue
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const version = '${{ needs.prepare.outputs.version }}';
+          
+          const body = `## 🎉 Version ${version} has been released!
+          
+          ### Quick Links
+          - [📦 Download Release](https://github.com/${{ github.repository }}/releases/tag/${version})
+          - [📝 Release Notes](https://github.com/${{ github.repository }}/releases/tag/${version})
+          - [📖 Documentation](https://github.com/${{ github.repository }}/blob/main/README.md)
+          
+          ### Installation
+          \`\`\`bash
+          curl -sSL https://github.com/${{ github.repository }}/releases/download/${version}/install.sh | bash
+          \`\`\`
+          
+          ### What's Next?
+          - [ ] Update your installations
+          - [ ] Review the changelog
+          - [ ] Report any issues
+          - [ ] Share feedback
+          
+          Thank you to all contributors! 🙏
+          `;
+          
+          await github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: `🚀 Release ${version} is now available!`,
+            body: body,
+            labels: ['announcement', 'release']
+          });
+    
+    - name: Update GitHub Topics
+      run: |
+        gh api repos/${{ github.repository }}/topics \
+          --method PUT \
+          --field names='["claude-code","statusline","bash","cli","terminal","powerline","git","developer-tools"]' \
+          || true
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

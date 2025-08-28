@@ -1,0 +1,385 @@
+name: Security Audit
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run security audit daily at 3 AM UTC
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  # ============================================================================
+  # SECRET SCANNING
+  # ============================================================================
+  
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for comprehensive scanning
+    
+    - name: TruffleHog OSS
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: ${{ github.event.repository.default_branch }}
+        head: HEAD
+        extra_args: --debug --only-verified
+    
+    - name: Gitleaks
+      uses: gitleaks/gitleaks-action@v2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+    
+    - name: Custom secret patterns
+      run: |
+        # Check for common secret patterns
+        SECRET_PATTERNS=(
+          'api[_-]?key.*[:=].*["\x27][0-9a-zA-Z]{32,}["\x27]'
+          'secret.*[:=].*["\x27][0-9a-zA-Z]{32,}["\x27]'
+          'token.*[:=].*["\x27][0-9a-zA-Z]{32,}["\x27]'
+          'password.*[:=].*["\x27].+["\x27]'
+          'aws[_-]?access[_-]?key[_-]?id'
+          'aws[_-]?secret[_-]?access[_-]?key'
+          'github[_-]?token'
+          'private[_-]?key'
+        )
+        
+        for pattern in "${SECRET_PATTERNS[@]}"; do
+          if grep -rEi "$pattern" --include="*.sh" --include="*.yml" --include="*.yaml" --include="*.json" .; then
+            echo "⚠️ Potential secret pattern detected: $pattern"
+            exit 1
+          fi
+        done
+        
+        echo "✅ No secret patterns detected"
+
+  # ============================================================================
+  # DEPENDENCY SCANNING
+  # ============================================================================
+  
+  dependency-scan:
+    name: Dependency Vulnerabilities
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Run OSV-Scanner
+      uses: google/osv-scanner-action@v1
+      with:
+        scan-args: |-
+          --recursive
+          --skip-git
+          ./
+    
+    - name: Check shell script dependencies
+      run: |
+        # List all external commands used in scripts
+        echo "External dependencies used:"
+        grep -h -o -E '\b(jq|bc|git|curl|wget|ssh|tar|zip)\b' *.sh | sort -u | while read -r cmd; do
+          echo "- $cmd: $(command -v $cmd || echo "NOT FOUND")"
+        done
+    
+    - name: License compliance check
+      run: |
+        # Check for license compatibility
+        echo "License check for dependencies..."
+        
+        # Check if any restrictive licenses are present
+        RESTRICTIVE_LICENSES=("GPL" "AGPL" "LGPL")
+        for license in "${RESTRICTIVE_LICENSES[@]}"; do
+          if grep -r "$license" --include="LICENSE*" --include="COPYING*" .; then
+            echo "⚠️ Found potentially restrictive license: $license"
+          fi
+        done
+
+  # ============================================================================
+  # VULNERABILITY SCANNING
+  # ============================================================================
+  
+  vulnerability-scan:
+    name: Vulnerability Assessment
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Run Trivy scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+        security-checks: 'vuln,secret,config'
+    
+    - name: Upload Trivy results
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-results.sarif'
+    
+    - name: Run Grype scanner
+      uses: anchore/scan-action@v3
+      with:
+        path: "."
+        fail-build: false
+        output-format: sarif
+        output-file: grype-results.sarif
+    
+    - name: Upload Grype results
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: grype-results.sarif
+    
+    - name: OWASP Dependency Check
+      uses: dependency-check/Dependency-Check_Action@main
+      with:
+        project: 'claude-statusline'
+        path: '.'
+        format: 'ALL'
+        args: >
+          --enableRetired
+          --enableExperimental
+          --nvdApiKey ${{ secrets.NVD_API_KEY }}
+      continue-on-error: true
+
+  # ============================================================================
+  # SAST (Static Application Security Testing)
+  # ============================================================================
+  
+  sast:
+    name: Static Security Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: 'python'  # For any Python helper scripts
+        queries: security-and-quality
+    
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+    
+    - name: Semgrep scan
+      uses: returntocorp/semgrep-action@v1
+      with:
+        config: >-
+          p/security-audit
+          p/secrets
+          p/owasp-top-ten
+          p/command-injection
+        generateSarif: true
+    
+    - name: Upload Semgrep results
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: semgrep.sarif
+      if: always()
+    
+    - name: ShellCheck security audit
+      run: |
+        # Run ShellCheck with security-focused checks
+        find . -name "*.sh" -type f -exec shellcheck \
+          --severity=info \
+          --check-sourced \
+          --external-sources \
+          --wiki-link-count=10 \
+          {} \; 2>&1 | tee shellcheck-security.log
+        
+        # Check for specific security issues
+        echo "Checking for security antipatterns..."
+        
+        # Check for eval usage
+        if grep -r "eval" --include="*.sh" .; then
+          echo "⚠️ Warning: eval usage detected (potential code injection)"
+        fi
+        
+        # Check for unquoted variables
+        if grep -rE '\$[{]?[A-Za-z_][A-Za-z0-9_]*[}]?(?!")' --include="*.sh" .; then
+          echo "⚠️ Warning: Unquoted variables detected (potential injection)"
+        fi
+
+  # ============================================================================
+  # CONTAINER SCANNING (if Dockerfile exists)
+  # ============================================================================
+  
+  container-scan:
+    name: Container Security
+    runs-on: ubuntu-latest
+    if: hashFiles('**/Dockerfile') != ''
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Run Hadolint
+      uses: hadolint/hadolint-action@v3
+      with:
+        dockerfile: Dockerfile
+        format: sarif
+        output-file: hadolint-results.sarif
+    
+    - name: Upload Hadolint results
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: hadolint-results.sarif
+    
+    - name: Build container image
+      run: docker build -t security-scan:${{ github.sha }} .
+    
+    - name: Run Trivy container scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: security-scan:${{ github.sha }}
+        format: 'sarif'
+        output: 'container-trivy.sarif'
+    
+    - name: Upload container scan results
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: container-trivy.sarif
+
+  # ============================================================================
+  # SECURITY SCORECARD
+  # ============================================================================
+  
+  scorecard:
+    name: Security Scorecard
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    permissions:
+      security-events: write
+      id-token: write
+      contents: read
+      actions: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+    
+    - name: Run OSSF Scorecard
+      uses: ossf/scorecard-action@v2
+      with:
+        results_file: scorecard-results.sarif
+        results_format: sarif
+        publish_results: true
+    
+    - name: Upload Scorecard results
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: scorecard-results.sarif
+
+  # ============================================================================
+  # SECURITY REPORT
+  # ============================================================================
+  
+  security-report:
+    name: Security Report Generation
+    needs: [secret-scan, dependency-scan, vulnerability-scan, sast, scorecard]
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Generate security report
+      run: |
+        cat > security-report.md << 'EOF'
+        # Security Audit Report
+        
+        **Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        **Repository:** ${{ github.repository }}
+        **Commit:** ${{ github.sha }}
+        
+        ## Summary
+        
+        | Check | Status |
+        |-------|--------|
+        | Secret Scanning | ${{ needs.secret-scan.result }} |
+        | Dependency Scanning | ${{ needs.dependency-scan.result }} |
+        | Vulnerability Scanning | ${{ needs.vulnerability-scan.result }} |
+        | SAST | ${{ needs.sast.result }} |
+        | Security Scorecard | ${{ needs.scorecard.result }} |
+        
+        ## Recommendations
+        
+        1. **Secrets Management**
+           - Use environment variables for sensitive data
+           - Implement secret rotation policies
+           - Use GitHub Secrets for CI/CD
+        
+        2. **Dependency Management**
+           - Keep dependencies up to date
+           - Review and audit third-party code
+           - Use lock files where applicable
+        
+        3. **Code Security**
+           - Follow secure coding practices
+           - Validate all inputs
+           - Use parameterized commands
+        
+        4. **Access Control**
+           - Implement branch protection
+           - Use CODEOWNERS file
+           - Enable 2FA for all contributors
+        
+        ## Next Steps
+        
+        - [ ] Review all security findings
+        - [ ] Prioritize critical vulnerabilities
+        - [ ] Create issues for remediation
+        - [ ] Update security documentation
+        
+        ---
+        
+        [View Full Security Dashboard](${{ github.server_url }}/${{ github.repository }}/security)
+        EOF
+        
+        echo "Security report generated"
+    
+    - name: Upload security report
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-report
+        path: security-report.md
+    
+    - name: Post security summary
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const report = fs.readFileSync('security-report.md', 'utf8');
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: report
+          });
