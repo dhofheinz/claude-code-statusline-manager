@@ -1,4 +1,3 @@
-<script>
 /* ================================================
    Advanced JavaScript - Claude Code Statusline Manager
    Parallax, Animations, and Interactive Components
@@ -739,4 +738,3 @@
     initAdvancedFeatures();
   }
 })();
-</script>
