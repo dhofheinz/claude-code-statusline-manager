@@ -548,10 +548,10 @@
       window.costVisualizer = new CostVisualizer(costContainer);
     }
     
-    // Initialize magnetic cursor on desktop only
-    if (window.innerWidth > 1024 && !('ontouchstart' in window)) {
-      new MagneticCursor();
-    }
+    // Magnetic cursor disabled - removed per user request
+    // if (window.innerWidth > 1024 && !('ontouchstart' in window)) {
+    //   new MagneticCursor();
+    // }
     
     // Initialize performance monitor
     new PerformanceMonitor();

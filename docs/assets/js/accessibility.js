@@ -336,7 +336,7 @@
     /* ========== Preferences Panel ========== */
     setupPreferencesPanel() {
       const panel = document.createElement('div');
-      panel.className = 'a11y-panel collapsed';
+      panel.className = 'a11y-panel'; // Start collapsed by default (CSS handles this)
       panel.setAttribute('role', 'dialog');
       panel.setAttribute('aria-label', 'Accessibility preferences');
       panel.setAttribute('aria-hidden', 'true');
@@ -423,18 +423,18 @@
     }
 
     togglePreferencesPanel() {
-      const isCollapsed = this.preferencesPanel.classList.contains('collapsed');
-      this.preferencesPanel.classList.toggle('collapsed');
-      this.preferencesPanel.setAttribute('aria-hidden', isCollapsed ? 'false' : 'true');
-      this.preferencesPanel.querySelector('.a11y-toggle').setAttribute('aria-expanded', isCollapsed);
+      const isExpanded = this.preferencesPanel.classList.contains('expanded');
+      this.preferencesPanel.classList.toggle('expanded');
+      this.preferencesPanel.setAttribute('aria-hidden', isExpanded ? 'true' : 'false');
+      this.preferencesPanel.querySelector('.a11y-toggle').setAttribute('aria-expanded', !isExpanded);
       
-      if (!isCollapsed) {
+      if (isExpanded) {
         this.releaseFocus(this.preferencesPanel);
       } else {
         this.trapFocus(this.preferencesPanel);
       }
       
-      this.announce(isCollapsed ? 'Accessibility panel opened' : 'Accessibility panel closed');
+      this.announce(isExpanded ? 'Accessibility panel closed' : 'Accessibility panel opened');
     }
 
     applyPreferences() {
@@ -581,7 +581,7 @@
         modal.remove();
       });
       
-      if (!this.preferencesPanel.classList.contains('collapsed')) {
+      if (this.preferencesPanel.classList.contains('expanded')) {
         this.togglePreferencesPanel();
       }
     }

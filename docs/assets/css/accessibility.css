@@ -312,7 +312,7 @@ p,
   position: fixed;
   top: 50%;
   right: 0;
-  transform: translateY(-50%);
+  transform: translateX(calc(100% - 48px)) translateY(-50%);
   background: var(--color-canvas-overlay);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg) 0 0 var(--radius-lg);
@@ -321,8 +321,8 @@ p,
   transition: transform var(--transition-base);
 }
 
-.aためy-panel.collapsed {
-  transform: translateX(calc(100% - 48px)) translateY(-50%);
+.a11y-panel.expanded {
+  transform: translateX(0) translateY(-50%);
 }
 
 .a11y-toggle {
