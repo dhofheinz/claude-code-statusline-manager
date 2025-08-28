@@ -530,8 +530,10 @@
     initKeyboardShortcuts();
     initReducedMotion();
     
-    // Initialize playground statusline
-    updateStatusline('playground-statusline', false);
+    // Initialize playground statusline with delay to ensure DOM is ready
+    setTimeout(() => {
+      updateStatusline('playground-statusline', false);
+    }, 100);
     
     // Add loaded class for CSS animations
     document.body.classList.add('loaded');

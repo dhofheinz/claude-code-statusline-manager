@@ -4,25 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Customizable statusline enhancement for Claude Code CLI with real-time metrics, cost tracking, and git integration">
-    
+
     <title>Claude Code Statusline Manager - Terminal Elegance for Your AI Coding Sessions</title>
-    
+
     <!-- Preconnect to external resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
+
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    
+
     <!-- Icons -->
     <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
-    
+
     <!-- Styles -->
     <link rel="stylesheet" href="assets/css/design-system.css">
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/advanced.css">
     <link rel="stylesheet" href="assets/css/accessibility.css">
-    
+    <link rel="stylesheet" href="assets/css/accessibility-fixes.css">
+
     <!-- Open Graph -->
     <meta property="og:title" content="Claude Code Statusline Manager">
     <meta property="og:description" content="Enhance your Claude Code CLI with customizable statuslines">
@@ -38,17 +39,17 @@
         <a href="#playground" class="skip-link">Skip to playground</a>
         <a href="#footer" class="skip-link">Skip to footer</a>
     </div>
-    
+
     <!-- Navigation -->
     <nav class="nav" role="navigation" aria-label="Main navigation" id="nav">
         <div class="nav__container container">
             <div class="nav__brand">
                 <a href="#" class="nav__logo" aria-label="Claude Code Statusline home">
                     <span class="nav__logo-icon">⟨▓⟩</span>
-                    <span class="nav__logo-text">Claude Code <span class="accent">Statusline</span></span>
+                    <span class="nav__logo-text">Claude Code <span class="accent">Statusline Manager</span></span>
                 </a>
             </div>
-            
+
             <div class="nav__menu">
                 <a href="#features" class="nav__link">Features</a>
                 <a href="#playground" class="nav__link">Playground</a>
@@ -61,7 +62,7 @@
                     GitHub
                 </a>
             </div>
-            
+
             <button class="nav__mobile-toggle" aria-label="Toggle navigation" aria-expanded="false">
                 <span></span>
                 <span></span>
@@ -69,7 +70,7 @@
             </button>
         </div>
     </nav>
-    
+
     <!-- Main Content -->
     <main id="main-content">
         <!-- Hero Section -->
@@ -86,12 +87,12 @@
                         <span class="hero__title-line">Terminal Elegance for</span>
                         <span class="hero__title-line hero__title-line--accent">Claude Code CLI</span>
                     </h1>
-                    
+
                     <p class="hero__description">
-                        Enhance your AI coding sessions with customizable statuslines featuring 
+                        Enhance your AI coding sessions with customizable statuslines featuring
                         real-time metrics, cost tracking, and git integration.
                     </p>
-                    
+
                     <div class="hero__actions" role="group" aria-label="Installation options">
                         <div class="install-command" role="region" aria-label="Installation command">
                             <code class="install-command__text">
@@ -105,7 +106,7 @@
                                 <span class="copy-text">Copy</span>
                             </button>
                         </div>
-                        
+
                         <a href="#features" class="hero__cta hero__cta--secondary" aria-label="Learn more about features">
                             See Features
                             <svg class="icon" viewBox="0 0 16 16" width="16" height="16">
@@ -114,7 +115,7 @@
                         </a>
                     </div>
                 </div>
-                
+
                 <div class="hero__preview" aria-hidden="true">
                     <div class="terminal">
                         <div class="terminal__header">
@@ -134,11 +135,11 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Background decoration -->
             <div class="hero__bg-glow" aria-hidden="true"></div>
         </section>
-        
+
         <!-- Features Section -->
         <section class="features animate-on-scroll from-left" id="features" aria-labelledby="features-title">
             <div class="container">
@@ -148,7 +149,7 @@
                         Choose the perfect statusline for your workflow
                     </p>
                 </header>
-                
+
                 <div class="features__grid">
                     <!-- Basic Statusline -->
                     <article class="feature-card animate-on-scroll" data-animate-once="false" role="article" aria-labelledby="feature-basic">
@@ -169,7 +170,7 @@
                             <li>Lightweight and fast</li>
                         </ul>
                     </article>
-                    
+
                     <!-- Minimal Statusline -->
                     <article class="feature-card animate-on-scroll" data-animate-once="false" role="article" aria-labelledby="feature-minimal">
                         <div class="feature-card__preview">
@@ -189,7 +190,7 @@
                             <li>Clean segment design</li>
                         </ul>
                     </article>
-                    
+
                     <!-- Segments Statusline -->
                     <article class="feature-card feature-card--featured animate-on-scroll" data-animate-once="false" role="article" aria-labelledby="feature-segments">
                         <div class="feature-card__preview">
@@ -214,7 +215,7 @@
                 </div>
             </div>
         </section>
-        
+
         <!-- Interactive Playground -->
         <section class="playground animate-on-scroll from-right" id="playground" aria-labelledby="playground-title">
             <div class="container">
@@ -224,7 +225,7 @@
                         Customize and preview your perfect statusline
                     </p>
                 </header>
-                
+
                 <div class="playground__content">
                     <div class="playground__controls">
                         <div class="control-group" role="group" aria-labelledby="style-label">
@@ -235,7 +236,7 @@
                                 <option value="segments" selected>Full Segments</option>
                             </select>
                         </div>
-                        
+
                         <div class="control-group" role="group" aria-labelledby="model-label">
                             <label for="model-select" id="model-label">Model</label>
                             <select id="model-select" class="select">
@@ -244,12 +245,12 @@
                                 <option value="HAIKU">Haiku</option>
                             </select>
                         </div>
-                        
+
                         <div class="control-group" role="group" aria-labelledby="cost-label">
                             <label for="cost-slider" id="cost-label">Cost: <span id="cost-value" aria-live="polite">$0.0456</span></label>
                             <input type="range" id="cost-slider" class="slider" min="0" max="0.20" step="0.001" value="0.0456">
                         </div>
-                        
+
                         <div class="control-group" role="group" aria-labelledby="git-label">
                             <label for="git-status" id="git-label">Git Status</label>
                             <select id="git-status" class="select">
@@ -259,7 +260,7 @@
                             </select>
                         </div>
                     </div>
-                    
+
                     <div class="playground__preview">
                         <div class="terminal terminal--large">
                             <div class="terminal__header">
@@ -281,7 +282,7 @@
             </div>
         </section>
     </main>
-    
+
     <!-- Footer -->
     <footer class="footer" id="footer" role="contentinfo">
         <div class="container footer__container">
@@ -297,7 +298,7 @@
             </div>
         </div>
     </footer>
-    
+
     <!-- Scripts -->
     <script src="assets/js/main.js"></script>
     <script src="assets/js/advanced.js"></script>

@@ -1,0 +1,231 @@
+/* ================================================
+   Accessibility Fixes - Ensure all modes work properly
+   ================================================ */
+
+/* ========== High Contrast Mode (Working) ========== */
+body.high-contrast {
+  --color-fg-default: #ffffff !important;
+  --color-fg-muted: #f0f0f0 !important;
+  --color-fg-subtle: #e0e0e0 !important;
+  --color-canvas-default: #000000 !important;
+  --color-canvas-subtle: #1a1a1a !important;
+  --color-canvas-inset: #0a0a0a !important;
+  --color-canvas-overlay: #2a2a2a !important;
+  --color-border-default: #ffffff !important;
+  --color-border-muted: #cccccc !important;
+  --color-border-subtle: #999999 !important;
+  --color-accent-claude: #ffff00 !important;
+  --color-accent-hover: #ffff66 !important;
+  --color-success-fg: #00ff00 !important;
+  --color-danger-fg: #ff0000 !important;
+  --color-warning-fg: #ffaa00 !important;
+  --color-info-fg: #00ffff !important;
+}
+
+body.high-contrast * {
+  border-width: 2px !important;
+  text-shadow: none !important;
+  filter: contrast(1.2) !important;
+}
+
+body.high-contrast button,
+body.high-contrast .btn,
+body.high-contrast a,
+body.high-contrast .nav__link,
+body.high-contrast .install-command,
+body.high-contrast .feature-card,
+body.high-contrast .terminal,
+body.high-contrast select,
+body.high-contrast input {
+  border: 2px solid currentColor !important;
+  font-weight: bold !important;
+}
+
+body.high-contrast .hero__title {
+  color: #ffffff !important;
+  text-shadow: 3px 3px 0 #000000 !important;
+}
+
+body.high-contrast .hero__title-line--accent {
+  background: linear-gradient(90deg, #ffff00, #00ffff) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  filter: none !important;
+}
+
+body.high-contrast .hero__description {
+  color: #f0f0f0 !important;
+  font-weight: 600 !important;
+}
+
+body.high-contrast .segment {
+  border: 1px solid white !important;
+}
+
+/* ========== Reduced Motion Mode (Working) ========== */
+body.reduce-motion *,
+body.reduce-motion *::before,
+body.reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
+body.reduce-motion .parallax-layer,
+body.reduce-motion [data-parallax] {
+  transform: none !important;
+  position: relative !important;
+}
+
+body.reduce-motion .animate-on-scroll {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+body.reduce-motion .hero__title-line--accent {
+  animation: none !important;
+}
+
+body.reduce-motion .parallax-dots,
+body.reduce-motion .parallax-gradient,
+body.reduce-motion .hero__bg-glow {
+  animation: none !important;
+}
+
+body.reduce-motion .pulse,
+body.reduce-motion .live-dot {
+  animation: gentle-opacity 3s ease-in-out infinite !important;
+}
+
+@keyframes gentle-opacity {
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 1; }
+}
+
+/* ========== Screen Reader Mode (Working) ========== */
+body.screen-reader-mode .statusline-preview::before {
+  content: attr(aria-label);
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+body.screen-reader-mode .decorative,
+body.screen-reader-mode [aria-hidden="true"]:not(.a11y-panel),
+body.screen-reader-mode .hero__bg-glow,
+body.screen-reader-mode .parallax-layer,
+body.screen-reader-mode .parallax-dots,
+body.screen-reader-mode .parallax-gradient,
+body.screen-reader-mode #cost-visualizer {
+  display: none !important;
+}
+
+body.screen-reader-mode .skip-link {
+  position: static !important;
+  width: auto !important;
+  height: auto !important;
+  padding: var(--space-3) var(--space-4) !important;
+  margin: var(--space-2) !important;
+  clip: auto !important;
+  overflow: visible !important;
+  background: var(--color-accent-claude) !important;
+  color: white !important;
+}
+
+body.screen-reader-mode img:not([alt]) {
+  outline: 3px solid red !important;
+}
+
+body.screen-reader-mode [role]:not([aria-label]):not([aria-labelledby]) {
+  outline: 2px dashed orange !important;
+}
+
+/* ========== Enhanced Focus Indicators (Working) ========== */
+body.show-focus *:focus,
+body.keyboard-nav *:focus {
+  outline: 3px solid var(--color-accent-claude) !important;
+  outline-offset: 4px !important;
+  box-shadow: 0 0 0 6px rgba(188, 140, 255, 0.3) !important;
+  border-radius: 4px;
+}
+
+body.show-focus button:focus,
+body.show-focus a:focus,
+body.show-focus input:focus,
+body.show-focus select:focus,
+body.show-focus textarea:focus {
+  transform: scale(1.02);
+}
+
+/* ========== Color Blind Modes (Working) ========== */
+body.protanopia {
+  filter: url(#protanopia) !important;
+}
+
+body.deuteranopia {
+  filter: url(#deuteranopia) !important;
+}
+
+body.tritanopia {
+  filter: url(#tritanopia) !important;
+}
+
+body.monochrome {
+  filter: grayscale(100%) contrast(1.1) !important;
+}
+
+body.monochrome .hero__title-line--accent {
+  background: linear-gradient(90deg, #ffffff, #cccccc) !important;
+}
+
+/* ========== Large Text Mode (Already Working) ========== */
+/* Applied via JavaScript: document.documentElement.style.fontSize = '125%' */
+
+/* ========== Additional Visual Indicators ========== */
+body.high-contrast .a11y-panel {
+  background: #000000 !important;
+  border: 3px solid #ffffff !important;
+}
+
+body.high-contrast .a11y-toggle {
+  background: #000000 !important;
+  border: 3px solid #ffffff !important;
+  color: #ffffff !important;
+  font-size: 24px !important;
+}
+
+body.reduce-motion .a11y-toggle {
+  transition: none !important;
+}
+
+/* Status indicators for debugging */
+body.high-contrast::before {
+  content: 'High Contrast Mode Active';
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  background: black;
+  color: yellow;
+  padding: 5px 10px;
+  font-size: 12px;
+  z-index: 10000;
+  border: 2px solid yellow;
+  pointer-events: none;
+}
+
+body.reduce-motion::after {
+  content: 'Reduced Motion Active';
+  position: fixed;
+  bottom: 40px;
+  left: 10px;
+  background: var(--color-canvas-overlay);
+  color: var(--color-fg-default);
+  padding: 5px 10px;
+  font-size: 12px;
+  z-index: 10000;
+  border: 1px solid var(--color-border-default);
+  pointer-events: none;
+}
