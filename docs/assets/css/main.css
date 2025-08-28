@@ -316,6 +316,8 @@
 
 /* Hero Preview */
 .hero__preview {
+  position: relative;
+  z-index: var(--z-elevated);
   animation: slideUp var(--transition-slower) ease-out;
   animation-delay: 200ms;
   animation-fill-mode: both;
