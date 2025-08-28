@@ -111,8 +111,8 @@ After installation, the statusline manager will be available at:
 ## 📚 Documentation
 
 - **[Getting Started Guide](GETTING_STARTED.md)** - Detailed setup instructions and first steps
-- **[Advanced Configuration](#advanced-configuration)** - Customize colors and segments
-- **[Troubleshooting](#troubleshooting)** - Common issues and solutions
+- **[Customization Guide](#-customization)** - Customize colors and segments
+- **[Troubleshooting](#-troubleshooting)** - Common issues and solutions
 
 ## 🎨 Customization
 
