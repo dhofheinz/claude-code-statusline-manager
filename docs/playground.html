@@ -4,21 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Interactive playground for Claude Code Statusline configurations">
-    
+
     <title>Playground - Claude Code Statusline Manager</title>
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    
+
     <!-- Styles -->
     <link rel="stylesheet" href="assets/css/design-system.css">
     <link rel="stylesheet" href="assets/css/main.css">
     <link rel="stylesheet" href="assets/css/advanced.css">
     <link rel="stylesheet" href="assets/css/accessibility.css">
     <link rel="stylesheet" href="assets/css/accessibility-fixes.css">
-    
+
     <style>
         /* Playground Specific Styles */
         .playground-hero {
@@ -295,7 +295,7 @@
                     <span class="nav__logo-text">Claude Code <span class="accent">Statusline</span></span>
                 </a>
             </div>
-            
+
             <div class="nav__menu">
                 <a href="index.html#features" class="nav__link">Features</a>
                 <a href="playground.html" class="nav__link" aria-current="page">Playground</a>
@@ -355,7 +355,7 @@
                     <h3 class="control-title">Cost Tracking</h3>
                     <label for="cost-slider">Amount: <span id="cost-value">$0.0456</span></label>
                     <input type="range" id="cost-slider" class="slider" min="0" max="0.20" step="0.001" value="0.0456" style="width: 100%;">
-                    
+
                     <label class="control-group" style="margin-top: var(--space-3);">
                         <input type="checkbox" id="show-burn-rate" checked> Show Burn Rate
                     </label>
@@ -370,9 +370,9 @@
                         <option value="staged">Staged Changes</option>
                         <option value="none">No Repository</option>
                     </select>
-                    
+
                     <input type="text" id="branch-name" class="select" value="main" placeholder="Branch name" style="width: 100%; margin-bottom: var(--space-3);">
-                    
+
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2);">
                         <input type="number" id="files-staged" class="select" value="3" min="0" placeholder="Staged">
                         <input type="number" id="files-changed" class="select" value="2" min="0" placeholder="Changed">
@@ -384,7 +384,7 @@
                     <h3 class="control-title">Performance</h3>
                     <label for="duration-slider">Duration: <span id="duration-value">2m 5s</span></label>
                     <input type="range" id="duration-slider" class="slider" min="0" max="600000" step="1000" value="125000" style="width: 100%;">
-                    
+
                     <label for="context-slider" style="margin-top: var(--space-3);">Context: <span id="context-value">45%</span></label>
                     <input type="range" id="context-slider" class="slider" min="0" max="100" step="1" value="45" style="width: 100%;">
                 </div>
@@ -513,7 +513,7 @@ input=$(cat)
 
 # Your statusline code will appear here...
                 </div>
-                
+
                 <div style="margin-top: var(--space-4);">
                     <h3 class="control-title">JSON Input</h3>
                     <div class="code-output" id="json-input" style="max-height: 200px;">
@@ -545,7 +545,7 @@ input=$(cat)
 
     <!-- Scripts -->
     <script src="assets/js/main.js"></script>
-    <script src="assets/js/advanced.js"></script>
+    <script src="assets/js/advanced.js" defer></script>
     <script src="assets/js/accessibility.js"></script>
     <script>
         // Enhanced playground functionality
@@ -565,7 +565,7 @@ input=$(cat)
                     context: 45,
                     theme: 'default'
                 };
-                
+
                 this.init();
             }
 
@@ -637,7 +637,7 @@ input=$(cat)
                 document.getElementById('main-preview').innerHTML = preview;
                 document.getElementById('dark-preview').innerHTML = preview;
                 document.getElementById('light-preview').innerHTML = preview;
-                
+
                 // Update stats
                 document.getElementById('char-count').textContent = preview.replace(/<[^>]*>/g, '').length;
                 document.getElementById('render-time').textContent = Math.floor(Math.random() * 20 + 5) + 'ms';
@@ -647,14 +647,14 @@ input=$(cat)
                 // Generate based on current state
                 // This would be the actual statusline generation logic
                 let output = '';
-                
+
                 if (this.state.style === 'segments') {
                     output = `<span style="background: #5e4b8c; padding: 4px 8px; color: white;">🎭 ${this.state.model}</span>`;
                     output += `<span style="background: #1f4788; padding: 4px 8px; color: white;">~/project</span>`;
                     output += `<span style="background: #2d5016; padding: 4px 8px; color: white;">⎇ ${this.state.branch}</span>`;
                     output += `<span style="background: #5d4318; padding: 4px 8px; color: white;">$${this.state.cost.toFixed(4)}</span>`;
                 }
-                
+
                 return output;
             }
 
@@ -682,7 +682,7 @@ echo -en "🎭 $model | $cwd | \\$$cost"`;
             copyScript() {
                 const script = this.generateBashScript();
                 navigator.clipboard.writeText(script);
-                
+
                 // Show feedback
                 const btn = document.getElementById('copy-script');
                 const originalText = btn.innerHTML;
