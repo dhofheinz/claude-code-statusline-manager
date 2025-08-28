@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Wrapper script for statusline-manager that ensures proper terminal handling
+
+# Check if we're running in an interactive terminal
+if [ -t 0 ]; then
+    # We have a terminal, run normally
+    exec /home/danie/.claude/statusline-manager.sh "$@"
+else
+    # No terminal attached, try to allocate one
+    if command -v script >/dev/null 2>&1; then
+        # Use script command to allocate a pseudo-terminal
+        script -qc "/home/danie/.claude/statusline-manager.sh $*" /dev/null
+    else
+        # Fallback: just run it
+        /home/danie/.claude/statusline-manager.sh "$@"
+    fi
+fi

@@ -1,0 +1,68 @@
+# Backup files
+*.backup
+*.bak
+*.old
+*.orig
+*~
+
+# Claude Code specific
+.claude/
+backups/
+settings.json
+!settings.json.example
+
+# OS specific
+.DS_Store
+Thumbs.db
+.directory
+
+# Editor specific
+*.swp
+*.swo
+*.swn
+.vscode/
+.idea/
+*.sublime-*
+
+# Logs
+*.log
+logs/
+
+# Test files
+test/
+tests/
+*.test
+*.spec
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Build artifacts
+dist/
+build/
+out/
+
+# Node (if future npm package)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Python (if future Python tools)
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+env/
+.env
+
+# Shell debugging
+*.trace
+*.debug
+
+# Planning documentation
+.claude/
+docs/
