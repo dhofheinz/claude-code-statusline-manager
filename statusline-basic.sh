@@ -7,7 +7,7 @@
 input=$(cat)
 
 # Get debian_chroot if it exists (for container/chroot environments)
-debian_chroot=$([ -r /etc/debian_chroot ] && cat /etc/debian_chroot)
+# debian_chroot=$([ -r /etc/debian_chroot ] && cat /etc/debian_chroot)  # Reserved for future use
 
 # Extract current directory from JSON
 current_dir=$(echo "$input" | jq -r '.workspace.current_dir')

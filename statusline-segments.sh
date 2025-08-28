@@ -6,7 +6,7 @@ input=$(cat)
 # ANSI codes
 RESET="\e[0m"
 BOLD="\e[1m"
-DIM="\e[2m"
+# DIM="\e[2m"  # Reserved for future use
 
 # Color Theory Applied: Using complementary and analogous colors
 # Primary: Blue/Cyan spectrum for main info
@@ -22,8 +22,8 @@ BG_GREEN="\e[48;5;40m"      # Success/Low cost - Bright green
 BG_YELLOW="\e[48;5;220m"    # Warning/Git dirty - Golden yellow
 BG_ORANGE="\e[48;5;208m"    # Medium warning - Bright orange
 BG_RED="\e[48;5;196m"       # Danger/High cost - Bright red
-BG_MAGENTA="\e[48;5;201m"   # Session/Special - Hot magenta
-BG_CYAN="\e[48;5;45m"       # Info - Sky cyan
+# BG_MAGENTA="\e[48;5;201m"   # Session/Special - Hot magenta (reserved)
+# BG_CYAN="\e[48;5;45m"       # Info - Sky cyan (reserved)
 BG_GRAY="\e[48;5;240m"      # Time/Stats - Medium gray
 BG_DARK="\e[48;5;236m"      # Context/Secondary - Dark gray
 
@@ -31,27 +31,28 @@ BG_DARK="\e[48;5;236m"      # Context/Secondary - Dark gray
 FG_WHITE="\e[38;5;255m"     # Pure white
 FG_BLACK="\e[38;5;16m"      # Pure black for yellow/light backgrounds
 FG_BRIGHT="\e[38;5;231m"    # Bright white
-FG_DARK="\e[38;5;232m"      # Very dark for light backgrounds
+# FG_DARK="\e[38;5;232m"      # Very dark for light backgrounds (reserved)
 
 # Arrow separators for segment transitions
 SEP="▶"
-SEP_THIN="│"
-SEP_ALT="▷"
+# SEP_THIN="│"  # Reserved for future use
+# SEP_ALT="▷"   # Reserved for future use
 
 # Transition colors (foreground color of arrow matches previous segment)
-trans_purple_blue="\e[38;5;93m\e[48;5;33m"
-trans_blue_git="\e[38;5;33m"
-trans_git_cost="\e[38;5;37m"
-trans_cost_time="\e[38;5;40m"
-trans_time_context="\e[38;5;240m"
-trans_context_changes="\e[38;5;236m"
-trans_final="\e[38;5;236m"
+# Transition colors (unused but kept for documentation)
+# trans_purple_blue="\e[38;5;93m\e[48;5;33m"
+# trans_blue_git="\e[38;5;33m"
+# trans_git_cost="\e[38;5;37m"
+# trans_cost_time="\e[38;5;40m"
+# trans_time_context="\e[38;5;240m"
+# trans_context_changes="\e[38;5;236m"
+# trans_final="\e[38;5;236m"
 
 # Extract all fields
 model=$(echo "$input" | jq -r '.model.display_name // "Unknown"')
 cwd=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // "~"')
 project_dir=$(echo "$input" | jq -r '.workspace.project_dir // ""')
-session_id=$(echo "$input" | jq -r '.session_id // ""')
+# session_id=$(echo "$input" | jq -r '.session_id // ""')  # Reserved for future use
 transcript_path=$(echo "$input" | jq -r '.transcript_path // ""')
 total_cost=$(echo "$input" | jq -r '.cost.total_cost_usd // 0')
 total_duration=$(echo "$input" | jq -r '.cost.total_duration_ms // 0')
@@ -105,7 +106,7 @@ if cd "$cwd" 2>/dev/null && git rev-parse --git-dir &>/dev/null; then
     [ ${#branch} -gt 12 ] && branch="${branch:0:10}.."
     
     # Get detailed git stats
-    ahead_behind=$(git rev-list --left-right --count HEAD...@{u} 2>/dev/null || echo "0 0")
+    ahead_behind=$(git rev-list --left-right --count 'HEAD...@{u}' 2>/dev/null || echo "0 0")
     ahead=$(echo "$ahead_behind" | cut -f1)
     behind=$(echo "$ahead_behind" | cut -f2)
     unstaged=$(git diff --numstat 2>/dev/null | wc -l)
