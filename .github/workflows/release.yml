@@ -328,19 +328,56 @@ jobs:
       run: |
         VERSION="${{ needs.prepare.outputs.version }}"
         VERSION_WITHOUT_V="${{ needs.prepare.outputs.version_without_v }}"
+        PREVIOUS_TAG="${{ needs.prepare.outputs.previous_tag }}"
+        TODAY=$(date +%Y-%m-%d)
         
-        # Update README with latest version
-        sed -i "s/version-[0-9.]*-/version-${VERSION_WITHOUT_V}-/g" README.md
+        # Create or update VERSION file
+        echo "$VERSION_WITHOUT_V" > VERSION
         
-        # Update installation instructions
-        sed -i "s|releases/download/v[0-9.]*/|releases/download/${VERSION}/|g" README.md
-        sed -i "s|releases/download/v[0-9.]*/|releases/download/${VERSION}/|g" GETTING_STARTED.md
+        # Update README with latest version badges (if they exist)
+        sed -i "s/version-[0-9.]*-/version-${VERSION_WITHOUT_V}-/g" README.md || true
         
-        # Update CHANGELOG
-        if ! grep -q "## \[$VERSION\]" CHANGELOG.md; then
-          sed -i "/## \[Unreleased\]/a\\
-        \\
-        ## [$VERSION] - $(date +%Y-%m-%d)" CHANGELOG.md
+        # Note: We intentionally DON'T update installation URLs to point to specific version
+        # Users should use main/latest for installation unless they specifically want an older version
+        
+        # Update CHANGELOG more comprehensively
+        if ! grep -q "## \[${VERSION}\]" CHANGELOG.md; then
+          # Get all commits since last release for the changelog
+          if [ -n "$PREVIOUS_TAG" ]; then
+            COMMITS=$(git log ${PREVIOUS_TAG}..HEAD --pretty=format:"- %s" --no-merges)
+          else
+            COMMITS=$(git log --pretty=format:"- %s" --no-merges)
+          fi
+          
+          # Move items from Unreleased to the new version section
+          # First, capture any unreleased content
+          UNRELEASED_CONTENT=$(sed -n '/## \[Unreleased\]/,/^## \[/p' CHANGELOG.md | sed '1d;$d' | sed '/^$/d')
+          
+          # Create the new version section with proper content
+          if [ -n "$UNRELEASED_CONTENT" ]; then
+            # If there's content in Unreleased, use it
+            sed -i "/## \[Unreleased\]/a\\
+\\
+## [${VERSION}] - ${TODAY}\\
+${UNRELEASED_CONTENT}" CHANGELOG.md
+            
+            # Clear the Unreleased section
+            sed -i '/## \[Unreleased\]/,/^## \[.*\] -/{//!d}' CHANGELOG.md
+          else
+            # Otherwise, add a basic entry with commit messages
+            sed -i "/## \[Unreleased\]/a\\
+\\
+## [${VERSION}] - ${TODAY}\\
+\\
+### Changes\\
+${COMMITS}" CHANGELOG.md
+          fi
+        fi
+        
+        # Add comparison link at the bottom of CHANGELOG (if not exists)
+        if ! grep -q "\[${VERSION}\]:" CHANGELOG.md; then
+          echo "" >> CHANGELOG.md
+          echo "[${VERSION}]: https://github.com/${{ github.repository }}/compare/${PREVIOUS_TAG:-v0.0.0}...${VERSION}" >> CHANGELOG.md
         fi
     
     - name: Create pull request for documentation updates
@@ -351,15 +388,28 @@ jobs:
         commit-message: "docs: update for release ${{ needs.prepare.outputs.version }}"
         title: "docs: update documentation for ${{ needs.prepare.outputs.version }}"
         body: |
-          ## Automated documentation update
+          ## Automated documentation update for release ${{ needs.prepare.outputs.version }}
           
-          This PR updates the documentation for release ${{ needs.prepare.outputs.version }}:
+          This PR includes the following automated updates:
           
-          - [ ] Version badges updated
-          - [ ] Installation instructions updated
-          - [ ] CHANGELOG entry added
+          ### Files Modified:
+          - ✅ **VERSION** - Updated to ${{ needs.prepare.outputs.version_without_v }}
+          - ✅ **CHANGELOG.md** - Added release entry with date and changes
+          - ✅ **README.md** - Updated version badges (if present)
           
-          **Auto-merge enabled after checks pass.**
+          ### What was done:
+          - Created/updated VERSION file with new version number
+          - Moved any Unreleased content to new version section in CHANGELOG
+          - Added comparison link for version diff
+          - Updated any version badges in README
+          
+          ### Note:
+          Installation URLs intentionally remain pointed at `main` branch for latest version.
+          
+          **Please review the CHANGELOG to ensure all changes are properly documented.**
+          
+          ---
+          *This PR was automatically created by the release workflow using the configured PAT_TOKEN.*
         branch: docs/release-${{ needs.prepare.outputs.version_without_v }}
         delete-branch: true
         labels: |
