@@ -440,7 +440,7 @@
     
     function cycleStyles() {
       state.currentStyle = styles[styleIndex];
-      updateStatusline('hero-statusline', true);
+      updateStatusline('hero-statusline', false); // Disable animation for smoother cycling
       
       styleIndex = (styleIndex + 1) % styles.length;
       
@@ -452,10 +452,8 @@
       state.linesRemoved = 5 + Math.floor(Math.random() * 20);
     }
     
-    // Initial animation
-    setTimeout(() => {
-      cycleStyles();
-    }, 1000);
+    // Initial display
+    cycleStyles();
     
     // Cycle every 5 seconds
     setInterval(cycleStyles, 5000);
