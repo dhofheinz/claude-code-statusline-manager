@@ -187,86 +187,6 @@
     }
   }
 
-  /* ========== Interactive Cost Visualizer ========== */
-  class CostVisualizer {
-    constructor(container) {
-      this.container = container;
-      this.canvas = null;
-      this.ctx = null;
-      this.particles = [];
-      this.init();
-    }
-
-    init() {
-      if (!this.container) return;
-      this.canvas = document.createElement('canvas');
-      this.canvas.className = 'cost-visualizer-canvas';
-      this.container.appendChild(this.canvas);
-      this.ctx = this.canvas.getContext('2d');
-      this.resize();
-      window.addEventListener('resize', () => this.resize(), PASSIVE);
-      this.animate();
-    }
-
-    resize() {
-      this.canvas.width = this.container.offsetWidth;
-      this.canvas.height = this.container.offsetHeight;
-    }
-
-    createParticle(x, y, cost) {
-      const hue = cost > 0.1 ? 0 : cost > 0.05 ? 45 : 120;
-      return {
-        x,
-        y,
-        vx: (Math.random() - 0.5) * 2,
-        vy: -Math.random() * 3 - 1,
-        life: 1,
-        hue,
-        size: Math.random() * 3 + 1
-      };
-    }
-
-    updateCost(cost) {
-      const x = this.canvas.width / 2;
-      const y = this.canvas.height / 2;
-      const particleCount = Math.max(1, Math.floor(cost * 100));
-      for (let i = 0; i < particleCount; i++) {
-        this.particles.push(this.createParticle(x, y, cost));
-      }
-    }
-
-    animate() {
-      const ctx = this.ctx;
-      const { width: w, height: h } = this.canvas;
-      ctx.fillStyle = 'rgba(13, 17, 23, 0.1)';
-      ctx.fillRect(0, 0, w, h);
-
-      const out = [];
-      for (let i = 0; i < this.particles.length; i++) {
-        const p = this.particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.life -= 0.01;
-        p.vy += 0.05;
-        if (p.life <= 0) continue;
-
-        ctx.save();
-        ctx.globalAlpha = p.life;
-        ctx.fillStyle = `hsl(${p.hue}, 100%, 50%)`;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = ctx.fillStyle;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.restore();
-
-        out.push(p);
-      }
-      this.particles = out;
-      requestAnimationFrame(() => this.animate());
-    }
-  }
-
   /* ========== Matrix Effect (refactored) ========== */
   /**
    * Highly efficient, reliable “Matrix” reveal for hero titles and any element.
@@ -576,72 +496,6 @@
     }
   }
 
-  /* ========== Magnetic Cursor Effect ========== */
-  class MagneticCursor {
-    constructor() {
-      this.cursor = null;
-      this.cursorDot = null;
-      this.mouseX = 0;
-      this.mouseY = 0;
-      this.cursorX = 0;
-      this.cursorY = 0;
-      this.init();
-    }
-
-    init() {
-      this.cursor = document.createElement('div');
-      this.cursor.className = 'magnetic-cursor';
-      this.cursor.style.cssText = `
-        position: fixed; width: 40px; height: 40px; border: 2px solid var(--color-accent-claude);
-        border-radius: 50%; pointer-events: none; z-index: 9999;
-        transition: transform 0.2s ease, opacity 0.2s ease; mix-blend-mode: difference;`;
-
-      this.cursorDot = document.createElement('div');
-      this.cursorDot.className = 'magnetic-cursor-dot';
-      this.cursorDot.style.cssText = `
-        position: fixed; width: 6px; height: 6px; background: var(--color-accent-claude);
-        border-radius: 50%; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%);`;
-
-      document.body.appendChild(this.cursor);
-      document.body.appendChild(this.cursorDot);
-
-      this.bindEvents();
-      this.animate();
-    }
-
-    bindEvents() {
-      document.addEventListener(
-        'mousemove',
-        (e) => {
-          this.mouseX = e.clientX;
-          this.mouseY = e.clientY;
-        },
-        PASSIVE
-      );
-
-      document.querySelectorAll('button, a, [data-magnetic]').forEach((element) => {
-        element.addEventListener('mouseenter', () => {
-          this.cursor.style.transform = 'scale(1.5)';
-        });
-        element.addEventListener('mouseleave', () => {
-          this.cursor.style.transform = 'scale(1)';
-        });
-      });
-    }
-
-    animate() {
-      this.cursorX += (this.mouseX - this.cursorX) * 0.1;
-      this.cursorY += (this.mouseY - this.cursorY) * 0.1;
-
-      this.cursor.style.left = `${this.cursorX - 20}px`;
-      this.cursor.style.top = `${this.cursorY - 20}px`;
-      this.cursorDot.style.left = `${this.mouseX}px`;
-      this.cursorDot.style.top = `${this.mouseY}px`;
-
-      requestAnimationFrame(() => this.animate());
-    }
-  }
-
   /* ========== Performance Monitor ========== */
   class PerformanceMonitor {
     constructor() {
@@ -718,15 +572,6 @@
         // maxDuration: 800
       });
     }
-
-    // Initialize cost visualizer
-    const costContainer = document.getElementById('cost-visualizer');
-    if (costContainer) {
-      window.costVisualizer = new CostVisualizer(costContainer);
-    }
-
-    // Magnetic cursor remains disabled per your note
-    // if (window.innerWidth > 1024 && !('ontouchstart' in window)) new MagneticCursor();
 
     new PerformanceMonitor();
     console.log('🚀 Advanced features initialized');

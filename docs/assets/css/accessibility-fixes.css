@@ -118,8 +118,7 @@ body.screen-reader-mode [aria-hidden="true"]:not(.a11y-panel),
 body.screen-reader-mode .hero__bg-glow,
 body.screen-reader-mode .parallax-layer,
 body.screen-reader-mode .parallax-dots,
-body.screen-reader-mode .parallax-gradient,
-body.screen-reader-mode #cost-visualizer {
+body.screen-reader-mode .parallax-gradient {
   display: none !important;
 }
 
