@@ -164,10 +164,16 @@
     0 0 40px rgba(188, 140, 255, 0.2);
   position: relative;
   z-index: 1;
+  min-height: 1.2em; /* Prevent collapse during animation */
+  display: block;
+  white-space: normal;
+  word-spacing: 0.05em;
 }
 
 .hero__title-line {
   display: block;
+  min-height: 1.1em; /* Prevent collapse */
+  position: relative;
 }
 
 .hero__title-line--accent {

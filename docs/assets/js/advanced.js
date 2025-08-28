@@ -307,23 +307,48 @@
       const text = this.element.textContent;
       this.element.textContent = '';
       
-      // Create character spans
+      // Store original dimensions to prevent layout shift
+      const originalHeight = this.element.offsetHeight;
+      this.element.style.minHeight = originalHeight + 'px';
+      
+      // Create character spans, preserving spaces
       for (let i = 0; i < text.length; i++) {
         const span = document.createElement('span');
-        span.textContent = text[i];
+        
+        // Preserve spaces properly
+        if (text[i] === ' ') {
+          span.innerHTML = '&nbsp;'; // Use non-breaking space
+          span.style.display = 'inline';
+        } else {
+          span.textContent = text[i];
+          span.style.display = 'inline-block';
+        }
+        
         span.style.opacity = '0';
-        span.style.display = 'inline-block';
         span.style.transition = 'all 0.5s ease';
+        span.style.whiteSpace = 'pre'; // Preserve whitespace
         this.element.appendChild(span);
         
         // Animate in with matrix effect
         setTimeout(() => {
           this.matrixReveal(span, text[i]);
-        }, i * 50);
+        }, i * 30); // Reduced delay for smoother animation
       }
+      
+      // Remove min-height after animation completes
+      setTimeout(() => {
+        this.element.style.minHeight = '';
+      }, text.length * 30 + 1000);
     }
 
     matrixReveal(span, finalChar) {
+      // Don't animate spaces
+      if (finalChar === ' ') {
+        span.innerHTML = '&nbsp;';
+        span.style.opacity = '1';
+        return;
+      }
+      
       let iterations = 0;
       const maxIterations = 10;
       
