@@ -10,13 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v1.0.0] - 2025-08-28
 
 ### Added
-- Community contribution guidelines
-- Installation script for automated setup
-- GitHub issue templates and workflows
-
-## [1.0.0] - 2024-01-01
-
-### Added
 - Initial release of Claude Code Statusline Manager
 - Three statusline styles: Basic, Minimal, and Full Segments
 - Interactive manager script with menu system
@@ -28,6 +21,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - API efficiency indicators
 - Line change tracking
 - Comprehensive documentation and getting started guide
+- One-line installation script with flexible path options
+- GitHub Actions CI/CD pipeline
+- Security scanning workflows
+- Community contribution templates
+- CLAUDE.md for Claude Code instance guidance
 
 ### Features
 - **Basic Statusline**: Terminal-style `user@host:directory` format
@@ -43,18 +41,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - JSON parsing via `jq` for data extraction
 - Atomic file operations for safe configuration updates
 - Cross-platform compatibility (Linux, macOS, WSL)
-
-### Documentation
-- Complete README with feature overview
-- Detailed Getting Started guide
-- Example settings.json configuration
-- Troubleshooting section
-- Customization instructions
-
-### Dependencies
-- Required: `jq` for JSON processing
-- Optional: `git` for repository status
-- Optional: `bc` for advanced calculations
 
 ## [0.9.0-beta] - 2023-12-15
 
@@ -100,7 +86,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Future Plans
 
-- None
+- Additional statusline themes
+- Performance monitoring dashboard
+- Multi-project support
+- Plugin system for extensions
+- Web-based configuration interface
+- Automated testing suite
 
 ## Support
 
