@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Customizable statusline enhancement for Claude Code CLI with real-time metrics, cost tracking, and git integration">
+    
+    <title>Claude Code Statusline Manager - Terminal Elegance for Your AI Coding Sessions</title>
+    
+    <!-- Preconnect to external resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="assets/img/favicon.svg">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/design-system.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/advanced.css">
+    <link rel="stylesheet" href="assets/css/accessibility.css">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Claude Code Statusline Manager">
+    <meta property="og:description" content="Enhance your Claude Code CLI with customizable statuslines">
+    <meta property="og:image" content="https://dhofheinz.github.io/claude-code-statusline-manager/assets/img/og-image.png">
+    <meta property="og:url" content="https://dhofheinz.github.io/claude-code-statusline-manager/">
+    <meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+    <!-- Skip Navigation -->
+    <div class="skip-links">
+        <a href="#main-content" class="skip-link">Skip to main content</a>
+        <a href="#features" class="skip-link">Skip to features</a>
+        <a href="#playground" class="skip-link">Skip to playground</a>
+        <a href="#footer" class="skip-link">Skip to footer</a>
+    </div>
+    
+    <!-- Navigation -->
+    <nav class="nav" role="navigation" aria-label="Main navigation" id="nav">
+        <div class="nav__container container">
+            <div class="nav__brand">
+                <a href="#" class="nav__logo" aria-label="Claude Code Statusline home">
+                    <span class="nav__logo-icon">⟨▓⟩</span>
+                    <span class="nav__logo-text">Claude Code <span class="accent">Statusline</span></span>
+                </a>
+            </div>
+            
+            <div class="nav__menu">
+                <a href="#features" class="nav__link">Features</a>
+                <a href="#playground" class="nav__link">Playground</a>
+                <a href="gallery.html" class="nav__link">Gallery</a>
+                <a href="https://github.com/dhofheinz/claude-code-statusline-manager/blob/main/README.md" class="nav__link">Docs</a>
+                <a href="https://github.com/dhofheinz/claude-code-statusline-manager" class="nav__link nav__link--github">
+                    <svg class="icon" viewBox="0 0 16 16" width="20" height="20">
+                        <path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    GitHub
+                </a>
+            </div>
+            
+            <button class="nav__mobile-toggle" aria-label="Toggle navigation" aria-expanded="false">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Main Content -->
+    <main id="main-content">
+        <!-- Hero Section -->
+        <section class="hero parallax-container" aria-labelledby="hero-title">
+            <div class="parallax-layer parallax-layer--bg">
+                <div class="parallax-dots" data-parallax="0.3"></div>
+            </div>
+            <div class="parallax-layer parallax-layer--mid">
+                <div class="parallax-gradient" data-parallax="0.5"></div>
+            </div>
+            <div class="container hero__container">
+                <div class="hero__content">
+                    <h1 id="hero-title" class="hero__title">
+                        <span class="hero__title-line">Terminal Elegance for</span>
+                        <span class="hero__title-line hero__title-line--accent">Claude Code CLI</span>
+                    </h1>
+                    
+                    <p class="hero__description">
+                        Enhance your AI coding sessions with customizable statuslines featuring 
+                        real-time metrics, cost tracking, and git integration.
+                    </p>
+                    
+                    <div class="hero__actions" role="group" aria-label="Installation options">
+                        <div class="install-command" role="region" aria-label="Installation command">
+                            <code class="install-command__text">
+                                curl -sSL https://raw.githubusercontent.com/dhofheinz/claude-code-statusline-manager/main/install.sh | bash
+                            </code>
+                            <button class="install-command__copy" aria-label="Copy installation command" aria-live="polite">
+                                <svg class="icon" viewBox="0 0 16 16" width="16" height="16">
+                                    <path fill="currentColor" d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 010 1.5h-1.5a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-1.5a.75.75 0 011.5 0v1.5A1.75 1.75 0 019.25 16h-7.5A1.75 1.75 0 010 14.25v-7.5z"/>
+                                    <path fill="currentColor" d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0114.25 11h-7.5A1.75 1.75 0 015 9.25v-7.5zm1.75-.25a.25.25 0 00-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 00.25-.25v-7.5a.25.25 0 00-.25-.25h-7.5z"/>
+                                </svg>
+                                <span class="copy-text">Copy</span>
+                            </button>
+                        </div>
+                        
+                        <a href="#features" class="hero__cta hero__cta--secondary" aria-label="Learn more about features">
+                            See Features
+                            <svg class="icon" viewBox="0 0 16 16" width="16" height="16">
+                                <path fill="currentColor" d="M12.78 6.22a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06 0L3.22 7.28a.75.75 0 011.06-1.06L8 9.94l3.72-3.72a.75.75 0 011.06 0z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="hero__preview" aria-hidden="true">
+                    <div class="terminal">
+                        <div class="terminal__header">
+                            <div class="terminal__controls">
+                                <span class="terminal__control terminal__control--close"></span>
+                                <span class="terminal__control terminal__control--minimize"></span>
+                                <span class="terminal__control terminal__control--maximize"></span>
+                            </div>
+                            <div class="terminal__title">claude</div>
+                        </div>
+                        <div class="terminal__body">
+                            <div class="statusline-preview" id="hero-statusline">
+                                <span class="statusline-preview__loading">Initializing statusline...</span>
+                            </div>
+                            <div id="cost-visualizer" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Background decoration -->
+            <div class="hero__bg-glow" aria-hidden="true"></div>
+        </section>
+        
+        <!-- Features Section -->
+        <section class="features animate-on-scroll from-left" id="features" aria-labelledby="features-title">
+            <div class="container">
+                <header class="section-header">
+                    <h2 id="features-title" class="section-header__title">Three Styles, Infinite Possibilities</h2>
+                    <p class="section-header__description">
+                        Choose the perfect statusline for your workflow
+                    </p>
+                </header>
+                
+                <div class="features__grid">
+                    <!-- Basic Statusline -->
+                    <article class="feature-card animate-on-scroll" data-animate-once="false" role="article" aria-labelledby="feature-basic">
+                        <div class="feature-card__preview">
+                            <div class="mini-terminal">
+                                <code class="statusline statusline--basic">
+                                    <span class="text-green">user@host</span>:<span class="text-blue">~/project</span>
+                                </code>
+                            </div>
+                        </div>
+                        <h3 class="feature-card__title" id="feature-basic">Basic</h3>
+                        <p class="feature-card__description">
+                            Familiar terminal-style prompt. Clean, minimal, and distraction-free.
+                        </p>
+                        <ul class="feature-card__list">
+                            <li>Traditional user@host format</li>
+                            <li>Current directory display</li>
+                            <li>Lightweight and fast</li>
+                        </ul>
+                    </article>
+                    
+                    <!-- Minimal Statusline -->
+                    <article class="feature-card animate-on-scroll" data-animate-once="false" role="article" aria-labelledby="feature-minimal">
+                        <div class="feature-card__preview">
+                            <div class="mini-terminal">
+                                <code class="statusline statusline--minimal">
+                                    <span class="segment segment--model">OPUS</span><span class="segment segment--dir">~/project</span><span class="segment segment--git">⎇ main*</span><span class="segment segment--cost">$0.0456</span>
+                                </code>
+                            </div>
+                        </div>
+                        <h3 class="feature-card__title" id="feature-minimal">Minimal</h3>
+                        <p class="feature-card__description">
+                            Compact powerline style with essential metrics at a glance.
+                        </p>
+                        <ul class="feature-card__list">
+                            <li>Model and cost tracking</li>
+                            <li>Git branch status</li>
+                            <li>Clean segment design</li>
+                        </ul>
+                    </article>
+                    
+                    <!-- Segments Statusline -->
+                    <article class="feature-card feature-card--featured animate-on-scroll" data-animate-once="false" role="article" aria-labelledby="feature-segments">
+                        <div class="feature-card__preview">
+                            <div class="mini-terminal">
+                                <code class="statusline statusline--segments">
+                                    <span class="segment segment--model">🎭 OPUS</span><span class="segment segment--dir">📁 project/src</span><span class="segment segment--git">⎇ main +3 ~2</span><span class="segment segment--cost">💰 $0.0456</span><span class="segment segment--time">⏱ 2m5s</span><span class="segment segment--context">📊 45%</span>
+                                </code>
+                            </div>
+                        </div>
+                        <h3 class="feature-card__title" id="feature-segments">Full Segments</h3>
+                        <p class="feature-card__description">
+                            Feature-rich display with comprehensive metrics and visual indicators.
+                        </p>
+                        <ul class="feature-card__list">
+                            <li>Cost burn rate tracking</li>
+                            <li>Context usage visualization</li>
+                            <li>API efficiency metrics</li>
+                            <li>Line change indicators</li>
+                            <li>Detailed git statistics</li>
+                        </ul>
+                    </article>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Interactive Playground -->
+        <section class="playground animate-on-scroll from-right" id="playground" aria-labelledby="playground-title">
+            <div class="container">
+                <header class="section-header">
+                    <h2 id="playground-title" class="section-header__title">Interactive Playground</h2>
+                    <p class="section-header__description">
+                        Customize and preview your perfect statusline
+                    </p>
+                </header>
+                
+                <div class="playground__content">
+                    <div class="playground__controls">
+                        <div class="control-group" role="group" aria-labelledby="style-label">
+                            <label for="style-select" id="style-label">Style</label>
+                            <select id="style-select" class="select">
+                                <option value="basic">Basic</option>
+                                <option value="minimal">Minimal</option>
+                                <option value="segments" selected>Full Segments</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-group" role="group" aria-labelledby="model-label">
+                            <label for="model-select" id="model-label">Model</label>
+                            <select id="model-select" class="select">
+                                <option value="OPUS">Opus</option>
+                                <option value="SONNET">Sonnet</option>
+                                <option value="HAIKU">Haiku</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-group" role="group" aria-labelledby="cost-label">
+                            <label for="cost-slider" id="cost-label">Cost: <span id="cost-value" aria-live="polite">$0.0456</span></label>
+                            <input type="range" id="cost-slider" class="slider" min="0" max="0.20" step="0.001" value="0.0456">
+                        </div>
+                        
+                        <div class="control-group" role="group" aria-labelledby="git-label">
+                            <label for="git-status" id="git-label">Git Status</label>
+                            <select id="git-status" class="select">
+                                <option value="clean">Clean</option>
+                                <option value="dirty">Uncommitted Changes</option>
+                                <option value="staged">Staged Changes</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="playground__preview">
+                        <div class="terminal terminal--large">
+                            <div class="terminal__header">
+                                <div class="terminal__controls">
+                                    <span class="terminal__control terminal__control--close"></span>
+                                    <span class="terminal__control terminal__control--minimize"></span>
+                                    <span class="terminal__control terminal__control--maximize"></span>
+                                </div>
+                                <div class="terminal__title">claude - playground</div>
+                            </div>
+                            <div class="terminal__body" role="region" aria-live="polite" aria-label="Live statusline preview">
+                                <div class="statusline-preview" id="playground-statusline" aria-describedby="playground-description">
+                                    <!-- Dynamic content -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="footer" id="footer" role="contentinfo">
+        <div class="container footer__container">
+            <div class="footer__content">
+                <p class="footer__copyright">
+                    © 2025 Claude Code Statusline Manager
+                </p>
+                <div class="footer__links">
+                    <a href="https://github.com/dhofheinz/claude-code-statusline-manager" class="footer__link">GitHub</a>
+                    <a href="https://github.com/dhofheinz/claude-code-statusline-manager/blob/main/LICENSE" class="footer__link">MIT License</a>
+                    <a href="https://github.com/dhofheinz/claude-code-statusline-manager/issues" class="footer__link">Report Issue</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Scripts -->
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/advanced.js"></script>
+    <script src="assets/js/accessibility.js"></script>
+</body>
+</html>
