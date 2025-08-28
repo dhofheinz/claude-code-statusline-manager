@@ -7,7 +7,6 @@ plugins: []
 # Keep it simple - we're serving static HTML
 include:
   - index.html
-  - gallery.html
   - playground.html
   - assets
   - .nojekyll
