@@ -39,8 +39,7 @@ SEP="▶"
 # SEP_ALT="▷"   # Reserved for future use
 
 # Transition colors (foreground color of arrow matches previous segment)
-# Transition colors (unused but kept for documentation)
-# trans_purple_blue="\e[38;5;93m\e[48;5;33m"
+trans_purple_blue="\e[38;5;93m\e[48;5;33m"
 # trans_blue_git="\e[38;5;33m"
 # trans_git_cost="\e[38;5;37m"
 # trans_cost_time="\e[38;5;40m"
@@ -62,16 +61,16 @@ lines_removed=$(echo "$input" | jq -r '.cost.total_lines_removed // 0')
 
 # Format model with emoji
 case "$model" in
-    *"Opus"*) 
+    *"Opus"*)
         model_display="🎭 OPUS"
         ;;
-    *"Sonnet"*) 
+    *"Sonnet"*)
         model_display="🎵 SONNET"
         ;;
-    *"Haiku"*) 
+    *"Haiku"*)
         model_display="🍃 HAIKU"
         ;;
-    *) 
+    *)
         model_display="🤖 ${model:0:7}"
         ;;
 esac
@@ -104,14 +103,14 @@ git_trans=""
 if cd "$cwd" 2>/dev/null && git rev-parse --git-dir &>/dev/null; then
     branch=$(git branch --show-current 2>/dev/null || git describe --tags --exact-match 2>/dev/null || echo "HEAD")
     [ ${#branch} -gt 12 ] && branch="${branch:0:10}.."
-    
+
     # Get detailed git stats
     ahead_behind=$(git rev-list --left-right --count 'HEAD...@{u}' 2>/dev/null || echo "0 0")
     ahead=$(echo "$ahead_behind" | cut -f1)
     behind=$(echo "$ahead_behind" | cut -f2)
     unstaged=$(git diff --numstat 2>/dev/null | wc -l)
     staged=$(git diff --cached --numstat 2>/dev/null | wc -l)
-    
+
     git_stats=""
     if [ "$staged" -gt 0 ]; then
         git_stats="${git_stats} +${staged}"
@@ -125,7 +124,7 @@ if cd "$cwd" 2>/dev/null && git rev-parse --git-dir &>/dev/null; then
     if [ "$behind" -gt 0 ]; then
         git_stats="${git_stats} ↓${behind}"
     fi
-    
+
     if [ -n "$git_stats" ]; then
         git_bg="${BG_YELLOW}"
         git_text="⎇ ${branch}${git_stats}"
@@ -172,7 +171,7 @@ time_text=""
 if [ "$total_duration" -gt 0 ]; then
     minutes=$((total_duration / 60000))
     seconds=$(((total_duration % 60000) / 1000))
-    
+
     # Calculate efficiency
     efficiency=""
     if [ "$api_duration" -gt 0 ]; then
@@ -185,7 +184,7 @@ if [ "$total_duration" -gt 0 ]; then
             efficiency=" 🐌"  # Slow
         fi
     fi
-    
+
     if [ "$minutes" -gt 0 ]; then
         time_text="${minutes}m${seconds}s${efficiency}"
     else
@@ -202,7 +201,7 @@ if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
     input_tokens=$(jq '[.messages[]? | select(.role == "user") | .content | length] | add // 0' "$transcript_path" 2>/dev/null || echo 0)
     output_tokens=$(jq '[.messages[]? | select(.role == "assistant") | .token_count // (.content | length / 4)] | add // 0' "$transcript_path" 2>/dev/null || echo 0)
     total_tokens=$((input_tokens / 4 + output_tokens))
-    
+
     if [ "$total_tokens" -gt 0 ]; then
         # Model-specific limits
         if [[ "$model" == *"Opus"* ]]; then
@@ -210,18 +209,18 @@ if [ -n "$transcript_path" ] && [ -f "$transcript_path" ]; then
         else
             max_context=100000
         fi
-        
+
         context_pct=$((total_tokens * 100 / max_context))
-        
+
         # Create visual bar
         bar_width=8
         filled=$((context_pct * bar_width / 100))
         [ "$filled" -gt "$bar_width" ] && filled=$bar_width
-        
+
         bar=""
         for ((i=0; i<filled; i++)); do bar="${bar}█"; done
         for ((i=filled; i<bar_width; i++)); do bar="${bar}░"; done
-        
+
         # Color based on usage
         if [ "$context_pct" -gt 80 ]; then
             context_bg="${BG_RED}"
