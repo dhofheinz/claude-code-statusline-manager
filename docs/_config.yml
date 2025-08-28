@@ -1,0 +1,13 @@
+# GitHub Pages Configuration
+# Minimal Jekyll config for static HTML site
+
+# No Jekyll theme or plugins needed
+plugins: []
+
+# Keep it simple - we're serving static HTML
+include:
+  - index.html
+  - gallery.html
+  - playground.html
+  - assets
+  - .nojekyll
