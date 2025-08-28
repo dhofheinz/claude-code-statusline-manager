@@ -542,6 +542,33 @@
   background: var(--color-canvas-subtle);
 }
 
+.segment--changes {
+  background: var(--color-canvas-overlay);
+}
+
+/* Cost-based segment variants */
+.segment--cost-low {
+  background: var(--statusline-cost-low);
+  color: white;
+}
+
+.segment--cost-medium {
+  background: var(--statusline-cost-medium);
+  color: white;
+}
+
+.segment--cost-high {
+  background: var(--statusline-cost-high);
+  color: white;
+}
+
+/* Segment separator */
+.segment-separator {
+  color: var(--color-fg-subtle);
+  margin: 0 2px;
+  opacity: 0.5;
+}
+
 /* ========== Playground Section ========== */
 .playground {
   padding: var(--space-9) 0;
