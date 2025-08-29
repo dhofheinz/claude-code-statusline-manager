@@ -36,7 +36,6 @@
     <div class="skip-links">
         <a href="#main-content" class="skip-link">Skip to main content</a>
         <a href="#features" class="skip-link">Skip to features</a>
-        <a href="#playground" class="skip-link">Skip to playground</a>
         <a href="#footer" class="skip-link">Skip to footer</a>
     </div>
 
@@ -52,7 +51,6 @@
 
             <div class="nav__menu">
                 <a href="#features" class="nav__link">Features</a>
-                <a href="playground.html" class="nav__link">Playground</a>
                 <a href="https://github.com/dhofheinz/claude-code-statusline-manager/blob/main/README.md" class="nav__link">Docs</a>
                 <a href="https://github.com/dhofheinz/claude-code-statusline-manager" class="nav__link nav__link--github">
                     <svg class="icon" viewBox="0 0 16 16" width="20" height="20">
@@ -83,8 +81,8 @@
             <div class="container hero__container">
                 <div class="hero__content">
                     <h1 id="hero-title" class="hero__title">
-                        <span class="hero__title-line">Terminal Elegance for</span>
-                        <span class="hero__title-line hero__title-line--accent">Claude Code CLI</span>
+                        <span class="hero__title-line">Terminal Elegance</span>
+                        <span class="hero__title-line hero__title-line--accent">for Claude Code</span>
                     </h1>
 
                     <p class="hero__description">
@@ -214,71 +212,6 @@
             </div>
         </section>
 
-        <!-- Interactive Playground -->
-        <section class="playground animate-on-scroll from-right" id="playground" aria-labelledby="playground-title">
-            <div class="container">
-                <header class="section-header">
-                    <h2 id="playground-title" class="section-header__title">Interactive Playground</h2>
-                    <p class="section-header__description">
-                        Customize and preview your perfect statusline
-                    </p>
-                </header>
-
-                <div class="playground__content">
-                    <div class="playground__controls">
-                        <div class="control-group" role="group" aria-labelledby="style-label">
-                            <label for="style-select" id="style-label">Style</label>
-                            <select id="style-select" class="select">
-                                <option value="basic">Basic</option>
-                                <option value="minimal">Minimal</option>
-                                <option value="segments" selected>Full Segments</option>
-                            </select>
-                        </div>
-
-                        <div class="control-group" role="group" aria-labelledby="model-label">
-                            <label for="model-select" id="model-label">Model</label>
-                            <select id="model-select" class="select">
-                                <option value="OPUS">Opus</option>
-                                <option value="SONNET">Sonnet</option>
-                                <option value="HAIKU">Haiku</option>
-                            </select>
-                        </div>
-
-                        <div class="control-group" role="group" aria-labelledby="cost-label">
-                            <label for="cost-slider" id="cost-label">Cost: <span id="cost-value" aria-live="polite">$0.0456</span></label>
-                            <input type="range" id="cost-slider" class="slider" min="0" max="0.20" step="0.001" value="0.0456">
-                        </div>
-
-                        <div class="control-group" role="group" aria-labelledby="git-label">
-                            <label for="git-status" id="git-label">Git Status</label>
-                            <select id="git-status" class="select">
-                                <option value="clean">Clean</option>
-                                <option value="dirty">Uncommitted Changes</option>
-                                <option value="staged">Staged Changes</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="playground__preview">
-                        <div class="terminal terminal--large">
-                            <div class="terminal__header">
-                                <div class="terminal__controls">
-                                    <span class="terminal__control terminal__control--close"></span>
-                                    <span class="terminal__control terminal__control--minimize"></span>
-                                    <span class="terminal__control terminal__control--maximize"></span>
-                                </div>
-                                <div class="terminal__title">claude - playground</div>
-                            </div>
-                            <div class="terminal__body" role="region" aria-live="polite" aria-label="Live statusline preview">
-                                <div class="statusline-preview" id="playground-statusline" aria-describedby="playground-description">
-                                    <!-- Dynamic content -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
     </main>
 
     <!-- Footer -->

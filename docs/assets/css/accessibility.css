@@ -310,7 +310,7 @@ p,
 /* ========== Accessibility Preferences Panel ========== */
 .a11y-panel {
   position: fixed;
-  top: 50%;
+  top: 50vh; /* Use viewport height instead of percentage */
   right: 0;
   transform: translateX(calc(100% - 48px)) translateY(-50%);
   background: var(--color-canvas-overlay);

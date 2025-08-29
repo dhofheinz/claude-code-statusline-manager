@@ -12,10 +12,18 @@
       this.preferences = this.loadPreferences();
       this.announcer = null;
       this.focusTrap = null;
+
+      // Internals for screen-reader enhancements
+      this._processedAttr = 'data-a11y-processed';
+      this._srBucketId = 'a11y-sr-bucket';
+      this._uid = 0;
+      this._idle = window.requestIdleCallback || ((cb) => setTimeout(cb, 16));
+
       this.init();
     }
 
     init() {
+      this.ensureVisuallyHiddenCSS();
       this.createAnnouncer();
       this.setupKeyboardNavigation();
       this.setupSkipLinks();
@@ -23,7 +31,7 @@
       this.setupPreferencesPanel();
       this.applyPreferences();
       this.bindEvents();
-      
+
       console.log('♿ Accessibility features initialized');
     }
 
@@ -41,6 +49,54 @@
 
     savePreferences() {
       localStorage.setItem('a11y-preferences', JSON.stringify(this.preferences));
+    }
+
+    /* ========== Utilities (SR-only CSS & bucket) ========== */
+    ensureVisuallyHiddenCSS() {
+      if (document.getElementById('a11y-sr-only-style')) return;
+      const style = document.createElement('style');
+      style.id = 'a11y-sr-only-style';
+      style.textContent = `
+        .sr-only{
+          position:absolute !important;
+          width:1px !important;height:1px !important;
+          padding:0 !important;margin:-1px !important;
+          overflow:hidden !important;clip:rect(0,0,0,0) !important;
+          white-space:nowrap !important;border:0 !important
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    getSrBucket(doc = document) {
+      let b = doc.getElementById(this._srBucketId);
+      if (!b) {
+        b = doc.createElement('div');
+        b.id = this._srBucketId;
+        // Do NOT aria-hide the bucket; individual spans are visually hidden via .sr-only
+        document.body.appendChild(b);
+      }
+      return b;
+    }
+
+    createSrText(text, doc = document) {
+      const id = `sr-${++this._uid}`;
+      const span = doc.createElement('span');
+      span.id = id;
+      span.className = 'sr-only';
+      span.textContent = text;
+      this.getSrBucket(doc).appendChild(span);
+      return id;
+    }
+
+    appendDescribedBy(el, id) {
+      const current = el.getAttribute('aria-describedby');
+      if (!current) {
+        el.setAttribute('aria-describedby', id);
+        return;
+      }
+      const list = current.split(/\s+/);
+      if (!list.includes(id)) el.setAttribute('aria-describedby', current + ' ' + id);
     }
 
     /* ========== Screen Reader Announcements ========== */
@@ -115,7 +171,7 @@
     handleTabNavigation(event) {
       // Add visible focus indicator
       document.body.classList.add('keyboard-nav');
-      
+
       // Remove on mouse movement
       document.addEventListener('mousemove', () => {
         document.body.classList.remove('keyboard-nav');
@@ -124,13 +180,13 @@
 
     handleArrowNavigation(event) {
       const activeElement = document.activeElement;
-      
+
       // Handle navigation menu
       if (activeElement.closest('.nav__menu')) {
         event.preventDefault();
         const links = Array.from(document.querySelectorAll('.nav__link'));
         const currentIndex = links.indexOf(activeElement);
-        
+
         if (event.key === 'ArrowRight' && currentIndex < links.length - 1) {
           links[currentIndex + 1].focus();
         } else if (event.key === 'ArrowLeft' && currentIndex > 0) {
@@ -190,7 +246,7 @@
     setupSkipLinks() {
       const skipLinksContainer = document.createElement('div');
       skipLinksContainer.className = 'skip-links';
-      
+
       const skipLinks = [
         { href: '#main-content', text: 'Skip to main content' },
         { href: '#nav', text: 'Skip to navigation' },
@@ -263,7 +319,7 @@
         if (!element.getAttribute('role')) {
           element.setAttribute('role', 'button');
           element.setAttribute('tabindex', '0');
-          
+
           // Add keyboard support
           element.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
@@ -277,7 +333,7 @@
       // Label icons
       document.querySelectorAll('.icon').forEach(icon => {
         const parent = icon.parentElement;
-        if (parent.tagName === 'A' || parent.tagName === 'BUTTON') {
+        if (parent && (parent.tagName === 'A' || parent.tagName === 'BUTTON')) {
           if (!parent.textContent.trim().replace(icon.textContent, '')) {
             icon.setAttribute('aria-hidden', 'true');
             parent.setAttribute('aria-label', parent.title || 'Icon button');
@@ -325,7 +381,7 @@
         container.removeEventListener('keydown', this.focusTrap);
         this.focusTrap = null;
       }
-      
+
       // Restore previous focus
       if (this.previousFocus) {
         this.previousFocus.focus();
@@ -347,32 +403,32 @@
         </button>
         <div class="a11y-options">
           <h3 style="margin-bottom: var(--space-3); font-size: var(--font-size-md);">Accessibility</h3>
-          
+
           <div class="a11y-option">
             <input type="checkbox" id="a11y-high-contrast">
             <label for="a11y-high-contrast">High Contrast</label>
           </div>
-          
+
           <div class="a11y-option">
             <input type="checkbox" id="a11y-reduced-motion">
             <label for="a11y-reduced-motion">Reduce Motion</label>
           </div>
-          
+
           <div class="a11y-option">
             <input type="checkbox" id="a11y-large-text">
             <label for="a11y-large-text">Large Text</label>
           </div>
-          
+
           <div class="a11y-option">
             <input type="checkbox" id="a11y-keyboard-indicators">
             <label for="a11y-keyboard-indicators">Show Focus Indicators</label>
           </div>
-          
+
           <div class="a11y-option">
             <input type="checkbox" id="a11y-screen-reader">
             <label for="a11y-screen-reader">Screen Reader Mode</label>
           </div>
-          
+
           <div class="a11y-option" style="margin-top: var(--space-3);">
             <label for="a11y-color-blind">Color Blind Mode:</label>
             <select id="a11y-color-blind" style="width: 100%; margin-top: var(--space-2);">
@@ -383,7 +439,7 @@
               <option value="monochrome">Monochrome</option>
             </select>
           </div>
-          
+
           <button class="btn-primary" style="margin-top: var(--space-4); width: 100%;" id="a11y-reset">
             Reset to Defaults
           </button>
@@ -426,14 +482,14 @@
       const isExpanded = this.preferencesPanel.classList.contains('expanded');
       this.preferencesPanel.classList.toggle('expanded');
       this.preferencesPanel.setAttribute('aria-hidden', isExpanded ? 'true' : 'false');
-      this.preferencesPanel.querySelector('.a11y-toggle').setAttribute('aria-expanded', !isExpanded);
-      
+      this.preferencesPanel.querySelector('.a11y-toggle').setAttribute('aria-expanded', String(!isExpanded));
+
       if (isExpanded) {
         this.releaseFocus(this.preferencesPanel);
       } else {
         this.trapFocus(this.preferencesPanel);
       }
-      
+
       this.announce(isExpanded ? 'Accessibility panel closed' : 'Accessibility panel opened');
     }
 
@@ -459,9 +515,7 @@
           break;
         case 'screenReaderMode':
           document.body.classList.toggle('screen-reader-mode', value);
-          if (value) {
-            this.enhanceForScreenReaders();
-          }
+          if (value) this.enhanceForScreenReaders();
           break;
       }
     }
@@ -511,22 +565,87 @@
       }
     }
 
-    enhanceForScreenReaders() {
-      // Add additional context for screen readers
-      document.querySelectorAll('.statusline-preview').forEach(preview => {
-        const text = preview.textContent;
-        preview.setAttribute('aria-label', `Statusline preview: ${text}`);
+    /* ========== Meaning inference helpers ========== */
+    explicitMeaning(el) {
+      const ds = el.dataset || {};
+      const val = (ds.severity || ds.state || '').toLowerCase();
+      if (val === 'success' || val === 'ok' || val === 'passed') return 'Success indicator';
+      if (val === 'warning' || val === 'caution')                return 'Warning indicator';
+      if (val === 'error' || val === 'fail' || val === 'high')   return 'Error or high cost indicator';
+
+      const cl = el.classList;
+      if (cl.contains('is-success') || cl.contains('success')) return 'Success indicator';
+      if (cl.contains('is-warning') || cl.contains('warning')) return 'Warning indicator';
+      if (cl.contains('is-error')   || cl.contains('error') ||
+          cl.contains('high-cost')  || cl.contains('danger'))  return 'Error or high cost indicator';
+      return null;
+    }
+
+    rgbToHue(r,g,b) {
+      r/=255; g/=255; b/=255;
+      const max = Math.max(r,g,b), min = Math.min(r,g,b);
+      const d = max - min;
+      if (!d) return 0;
+      let h;
+      switch (max) {
+        case r: h = ((g-b)/d) % 6; break;
+        case g: h = (b-r)/d + 2;   break;
+        default: h = (r-g)/d + 4;  break;
+      }
+      h = Math.round(h*60);
+      return (h + 360) % 360;
+    }
+
+    inferMeaningFromColor(el) {
+      const c = getComputedStyle(el).color;
+      const nums = c.match(/[\d.]+/g);
+      if (!nums || nums.length < 3) return null;
+      const r = Number(nums[0]), g = Number(nums[1]), b = Number(nums[2]);
+      const h = this.rgbToHue(r,g,b);
+      if ((h >= 350 || h <= 20))  return 'Error or high cost indicator';
+      if (h >= 40 && h <= 70)     return 'Warning indicator';
+      if (h >= 80 && h <= 170)    return 'Success indicator';
+      return null;
+    }
+
+    /* ========== Screen Reader Enhancements (updated) ========== */
+    enhanceForScreenReaders(root = document) {
+      // 1) Statusline previews: keep visible text as accessible name; add context via describedby
+      root.querySelectorAll('.statusline-preview').forEach(preview => {
+        if (preview.getAttribute(this._processedAttr) === 'preview') return;
+
+        const text = (preview.textContent || '').trim();
+
+        if (text) {
+          const id = this.createSrText(`Statusline preview: ${text}`, preview.ownerDocument);
+          this.appendDescribedBy(preview, id);
+          // Do NOT set aria-label here—labels override the text alternative.
+        } else {
+          // Icon-only or empty container: give it a role and a label fallback
+          if (!preview.hasAttribute('role')) preview.setAttribute('role', 'img');
+          if (!preview.hasAttribute('aria-label')) preview.setAttribute('aria-label', 'Statusline preview');
+        }
+
+        preview.setAttribute(this._processedAttr, 'preview');
       });
 
-      // Add descriptions to color-coded elements
-      document.querySelectorAll('[style*="color"]').forEach(element => {
-        const color = element.style.color || window.getComputedStyle(element).color;
-        if (color.includes('green')) {
-          element.setAttribute('aria-description', 'Success indicator');
-        } else if (color.includes('red')) {
-          element.setAttribute('aria-description', 'Error or high cost indicator');
-        } else if (color.includes('yellow')) {
-          element.setAttribute('aria-description', 'Warning indicator');
+      // 2) Indicators: prefer explicit semantics; fall back to color inference
+      const indicatorSelector = [
+        '[data-severity]','[data-state]',
+        '.is-success','.is-warning','.is-error',
+        '.success','.warning','.error',
+        '[style*="color"]'
+      ].join(',');
+
+      root.querySelectorAll(indicatorSelector).forEach(el => {
+        if (el.getAttribute(this._processedAttr) === 'indicator') return;
+        if (el.getAttribute('aria-hidden') === 'true') return;
+
+        const meaning = this.explicitMeaning(el) || this.inferMeaningFromColor(el);
+        if (meaning) {
+          const id = this.createSrText(meaning, el.ownerDocument);
+          this.appendDescribedBy(el, id);
+          el.setAttribute(this._processedAttr, 'indicator');
         }
       });
     }
@@ -537,12 +656,12 @@
       modal.className = 'modal';
       modal.setAttribute('role', 'dialog');
       modal.setAttribute('aria-label', 'Keyboard shortcuts');
-      
+
       modal.innerHTML = `
         <div class="modal-content">
           <h2>Keyboard Shortcuts</h2>
           <button class="close-btn" aria-label="Close">×</button>
-          
+
           <table>
             <thead>
               <tr>
@@ -566,7 +685,7 @@
 
       document.body.appendChild(modal);
       this.trapFocus(modal);
-      
+
       modal.querySelector('.close-btn').addEventListener('click', () => {
         this.releaseFocus(modal);
         modal.remove();
@@ -580,7 +699,7 @@
         this.releaseFocus(modal);
         modal.remove();
       });
-      
+
       if (this.preferencesPanel.classList.contains('expanded')) {
         this.togglePreferencesPanel();
       }
@@ -595,16 +714,16 @@
         screenReaderMode: false,
         colorBlindMode: null
       };
-      
+
       this.applyPreferences();
       this.savePreferences();
-      
+
       // Update UI
       this.preferencesPanel.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
         const pref = checkbox.id.replace('a11y-', '').replace(/-([a-z])/g, (g) => g[1].toUpperCase());
         checkbox.checked = this.preferences[pref] || false;
       });
-      
+
       this.preferencesPanel.querySelector('#a11y-color-blind').value = '';
     }
 
@@ -620,31 +739,53 @@
         }
       });
 
-      window.matchMedia('(prefers-contrast: high)').addEventListener('change', (e) => {
-        if (this.preferences.highContrast !== e.matches) {
-          this.preferences.highContrast = e.matches;
-          this.applyPreference('highContrast', e.matches);
-          this.savePreferences();
-          this.announce(`High contrast ${e.matches ? 'enabled' : 'disabled'} based on system preference`);
-        }
-      });
+      // Some browsers expose prefers-contrast
+      const prefersContrast = window.matchMedia('(prefers-contrast: high)');
+      if (prefersContrast && typeof prefersContrast.addEventListener === 'function') {
+        prefersContrast.addEventListener('change', (e) => {
+          if (this.preferences.highContrast !== e.matches) {
+            this.preferences.highContrast = e.matches;
+            this.applyPreference('highContrast', e.matches);
+            this.savePreferences();
+            this.announce(`High contrast ${e.matches ? 'enabled' : 'disabled'} based on system preference`);
+          }
+        });
+      }
 
-      // Announce page changes for screen readers
+      // Announce page changes and keep SR enhancements fresh for dynamic UIs
+      let scheduled = false;
       const observer = new MutationObserver((mutations) => {
-        mutations.forEach(mutation => {
+        let sawStatus = false;
+        for (const mutation of mutations) {
           if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
             mutation.addedNodes.forEach(node => {
               if (node.nodeType === 1 && node.classList?.contains('status-message')) {
-                this.announce(node.textContent, 'assertive');
+                sawStatus = true;
               }
             });
           }
-        });
+        }
+
+        if (sawStatus) {
+          const latest = document.querySelector('.status-message:last-of-type');
+          if (latest) this.announce(latest.textContent, 'assertive');
+        }
+
+        if (this.preferences.screenReaderMode && !scheduled) {
+          scheduled = true;
+          this._idle(() => {
+            scheduled = false;
+            this.enhanceForScreenReaders(document);
+          });
+        }
       });
 
       observer.observe(document.body, {
         childList: true,
-        subtree: true
+        subtree: true,
+        attributes: true,
+        characterData: true,
+        attributeFilter: ['class','style','aria-hidden']
       });
     }
 
@@ -652,13 +793,13 @@
       this.preferences.highContrast = !this.preferences.highContrast;
       this.applyPreference('highContrast', this.preferences.highContrast);
       this.savePreferences();
-      
+
       // Update checkbox
       const checkbox = document.getElementById('a11y-high-contrast');
       if (checkbox) {
         checkbox.checked = this.preferences.highContrast;
       }
-      
+
       this.announce(`High contrast ${this.preferences.highContrast ? 'enabled' : 'disabled'}`);
     }
   }
