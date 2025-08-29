@@ -178,6 +178,9 @@ body.monochrome {
 
 body.monochrome .hero__title-line--accent {
   background: linear-gradient(90deg, #ffffff, #cccccc) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
 }
 
 /* ========== Large Text Mode (Already Working) ========== */
